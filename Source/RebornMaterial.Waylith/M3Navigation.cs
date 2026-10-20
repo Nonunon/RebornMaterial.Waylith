@@ -1,6 +1,3 @@
-using Dalamud.Interface.Textures.TextureWraps;
-using Dalamud.Interface.Utility.Raii;
-
 namespace RebornMaterial;
 
 // Section puts a heading above the first item of each group in the drawer, and a divider in the rail.
@@ -10,11 +7,11 @@ public readonly record struct M3NavItem(
 	FontAwesomeIcon Icon,
 	bool Selected,
 	string? Tooltip = null,
-	Vector4? Accent = null,
+	float4? Accent = null,
 	string? Badge = null,
 	bool SeparatorAfter = false,
 	string? Section = null,
-	IDalamudTextureWrap? Texture = null);
+	IM3Texture? Texture = null);
 
 public readonly record struct M3Tab(
 	string Label,
@@ -83,18 +80,18 @@ public static class M3Navigation
 		}
 
 		var scale = M3.Scale;
-		ImGui.Dummy(new Vector2(0f, 2f * scale));
+		ImGui.Dummy(new float2(0f, 2f * scale));
 		ImGui.SetCursorPosX(ImGui.GetCursorPosX() + M3Style.Spacing(16f, 12f));
 		M3Text.Draw(Truncate(text, ImGui.GetContentRegionAvail().X - M3Style.Spacing(16f, 12f)), M3TextStyle.Muted);
-		ImGui.Dummy(new Vector2(0f, 2f * scale));
+		ImGui.Dummy(new float2(0f, 2f * scale));
 	}
 
-	private static Vector2 ItemIconSize(in M3NavItem item, float textureSize)
+	private static float2 ItemIconSize(in M3NavItem item, float textureSize)
 	{
-		return item.Texture != null ? new Vector2(textureSize, textureSize) : M3Draw.MeasureIcon(item.Icon);
+		return item.Texture != null ? new float2(textureSize, textureSize) : M3Draw.MeasureIcon(item.Icon);
 	}
 
-	private static void ItemIcon(ImDrawListPtr drawList, in M3NavItem item, Vector2 position, float textureSize, Vector4 color)
+	private static void ItemIcon(ImDrawListPtr drawList, in M3NavItem item, float2 position, float textureSize, float4 color)
 	{
 		if (item.Texture == null || !M3Draw.Texture(drawList, item.Texture, position, textureSize))
 		{
@@ -111,7 +108,7 @@ public static class M3Navigation
 		var height = DrawerRowHeight;
 		var textureSize = MathF.Max(20f * scale, ImGui.GetTextLineHeight());
 
-		var pressed = ImGui.InvisibleButton($"nav_{item.Id}", new Vector2(width, height));
+		var pressed = ImGui.InvisibleButton($"nav_{item.Id}", new float2(width, height));
 		var hovered = ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenBlockedByActiveItem);
 		var held = ImGui.IsItemActive();
 		var min = ImGui.GetItemRectMin();
@@ -137,20 +134,20 @@ public static class M3Navigation
 
 		var iconSize = ItemIconSize(item, textureSize);
 		var iconX = min.X + M3Style.Spacing(16f, 12f);
-		ItemIcon(drawList, item, new Vector2(iconX, min.Y + ((height - iconSize.Y) * 0.5f)), textureSize, iconColor);
+		ItemIcon(drawList, item, new float2(iconX, min.Y + ((height - iconSize.Y) * 0.5f)), textureSize, iconColor);
 
 		var textX = iconX + MathF.Max(iconSize.X, 18f * scale) + M3Style.Spacing(14f, 10f);
 		var available = MathF.Max(16f * scale, max.X - textX - (12f * scale));
 		var label = Truncate(item.Label, available);
 		var labelSize = ImGui.CalcTextSize(label);
-		drawList.AddText(new Vector2(textX, min.Y + ((height - labelSize.Y) * 0.5f)), M3.U32(textColor), label);
+		drawList.AddText(new float2(textX, min.Y + ((height - labelSize.Y) * 0.5f)), M3.U32(textColor), label);
 
 		if (!string.IsNullOrEmpty(item.Badge))
 		{
 			using var badgeFont = ImRaii.PushFont(M3.LabelSmall);
 			var badgeSize = ImGui.CalcTextSize(item.Badge);
-			var padding = new Vector2(6f, 2f) * scale;
-			var badgeMax = new Vector2(max.X - (12f * scale), min.Y + ((height + badgeSize.Y + (padding.Y * 2f)) * 0.5f));
+			var padding = new float2(6f, 2f) * scale;
+			var badgeMax = new float2(max.X - (12f * scale), min.Y + ((height + badgeSize.Y + (padding.Y * 2f)) * 0.5f));
 			var badgeMin = badgeMax - badgeSize - (padding * 2f);
 			drawList.AddRectFilled(badgeMin, badgeMax, M3.U32(s.Error, 0.9f), M3.ShapeFull);
 			drawList.AddText(badgeMin + padding, M3.U32(s.OnError), item.Badge);
@@ -174,23 +171,23 @@ public static class M3Navigation
 		var width = MathF.Max(32f * scale, ImGui.GetContentRegionAvail().X);
 		var height = RailItemHeight;
 
-		var pressed = ImGui.InvisibleButton($"nav_{item.Id}", new Vector2(width, height));
+		var pressed = ImGui.InvisibleButton($"nav_{item.Id}", new float2(width, height));
 		var hovered = ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenBlockedByActiveItem);
 		var held = ImGui.IsItemActive();
 		var min = ImGui.GetItemRectMin();
 		var drawList = ImGui.GetWindowDrawList();
 		var selection = M3Motion.Approach($"nav_sel_{item.Id}", item.Selected ? 1f : 0f, M3Motion.EmphasisedDuration);
 
-		var indicatorSize = new Vector2(MathF.Min(56f * scale, width - (4f * scale)), 32f * scale);
-		var indicatorMin = new Vector2(min.X + ((width - indicatorSize.X) * 0.5f), min.Y + (4f * scale));
+		var indicatorSize = new float2(MathF.Min(56f * scale, width - (4f * scale)), 32f * scale);
+		var indicatorMin = new float2(min.X + ((width - indicatorSize.X) * 0.5f), min.Y + (4f * scale));
 		var indicatorMax = indicatorMin + indicatorSize;
 
 		if (selection > 0.01f)
 		{
 			var grow = (1f - selection) * 6f * scale;
 			drawList.AddRectFilled(
-				indicatorMin + new Vector2(grow, 0f),
-				indicatorMax - new Vector2(grow, 0f),
+				indicatorMin + new float2(grow, 0f),
+				indicatorMax - new float2(grow, 0f),
 				M3.U32(s.SecondaryContainer, 0.95f * selection), indicatorSize.Y * 0.5f);
 		}
 
@@ -212,7 +209,7 @@ public static class M3Navigation
 			var labelSize = ImGui.CalcTextSize(label);
 			var textColor = M3ColorMath.Mix(M3.Alpha(s.OnSurfaceVariant, 0.9f), s.OnSurface, selection);
 			drawList.AddText(
-				new Vector2(min.X + ((width - labelSize.X) * 0.5f), indicatorMax.Y + (4f * scale)),
+				new float2(min.X + ((width - labelSize.X) * 0.5f), indicatorMax.Y + (4f * scale)),
 				M3.U32(textColor), label);
 		}
 
@@ -318,7 +315,7 @@ public static class M3Navigation
 			target = ScrollToShow(target, lefts[selectedIndex], widths[selectedIndex], viewWidth);
 		}
 
-		if (scrolling && ImGui.IsMouseHoveringRect(origin, origin + new Vector2(total, height)) && ImGui.IsWindowHovered())
+		if (scrolling && ImGui.IsMouseHoveringRect(origin, origin + new float2(total, height)) && ImGui.IsWindowHovered())
 		{
 			var io = ImGui.GetIO();
 			var wheel = io.MouseWheelH != 0f ? io.MouseWheelH : ImGui.GetScrollMaxY() <= 0f ? -io.MouseWheel : 0f;
@@ -329,13 +326,13 @@ public static class M3Navigation
 		{
 			var diameter = 28f * scale;
 			var top = origin.Y + ((height - diameter) * 0.5f);
-			ImGui.SetCursorScreenPos(new Vector2(origin.X + ((arrow - diameter) * 0.5f), top));
+			ImGui.SetCursorScreenPos(new float2(origin.X + ((arrow - diameter) * 0.5f), top));
 			if (M3Widgets.IconButton("##scroll_left", FontAwesomeIcon.ChevronLeft, null, diameter: diameter, enabled: target > 0.5f))
 			{
 				target -= viewWidth * 0.7f;
 			}
 
-			ImGui.SetCursorScreenPos(new Vector2(origin.X + total - arrow + ((arrow - diameter) * 0.5f), top));
+			ImGui.SetCursorScreenPos(new float2(origin.X + total - arrow + ((arrow - diameter) * 0.5f), top));
 			if (M3Widgets.IconButton("##scroll_right", FontAwesomeIcon.ChevronRight, null, diameter: diameter, enabled: target < maxScroll - 0.5f))
 			{
 				target += viewWidth * 0.7f;
@@ -350,17 +347,17 @@ public static class M3Navigation
 		var indicatorX = 0f;
 		var indicatorWidth = 0f;
 
-		ImGui.PushClipRect(new Vector2(viewLeft, origin.Y), new Vector2(viewLeft + viewWidth, origin.Y + height), true);
+		ImGui.PushClipRect(new float2(viewLeft, origin.Y), new float2(viewLeft + viewWidth, origin.Y + height), true);
 		for (var i = 0; i < tabs.Length; i++)
 		{
 			var tab = tabs[i];
 			var tabWidth = widths[i];
 			var selected = i == selectedIndex;
-			var tabMin = new Vector2(contentOrigin + lefts[i], origin.Y);
-			var tabMax = tabMin + new Vector2(tabWidth, height);
+			var tabMin = new float2(contentOrigin + lefts[i], origin.Y);
+			var tabMax = tabMin + new float2(tabWidth, height);
 
 			ImGui.SetCursorScreenPos(tabMin);
-			if (ImGui.InvisibleButton($"##tab{i}", new Vector2(tabWidth, height)) && !selected)
+			if (ImGui.InvisibleButton($"##tab{i}", new float2(tabWidth, height)) && !selected)
 			{
 				result = i;
 			}
@@ -376,29 +373,29 @@ public static class M3Navigation
 
 			var content = !selected ? s.OnSurfaceVariant : secondary ? s.OnSurface : s.Primary;
 			var hasIcon = tab.Icon != FontAwesomeIcon.None;
-			var iconSize = hasIcon ? M3Draw.MeasureIcon(tab.Icon) : Vector2.Zero;
+			var iconSize = hasIcon ? M3Draw.MeasureIcon(tab.Icon) : float2.Zero;
 			var inlineGap = hasIcon && !stacked ? 8f * scale : 0f;
 			var inlineIcon = hasIcon && !stacked ? iconSize.X + inlineGap : 0f;
 
-			var badgeSize = string.IsNullOrEmpty(tab.Badge) ? Vector2.Zero : M3Widgets.BadgeSize(tab.Badge);
+			var badgeSize = string.IsNullOrEmpty(tab.Badge) ? float2.Zero : M3Widgets.BadgeSize(tab.Badge);
 			var badgeRoom = badgeSize.X > 0f ? (badgeSize.X + (4f * scale)) * 2f : 0f;
 			var label = Truncate(tab.Label, MathF.Max(8f * scale, tabWidth - (16f * scale) - inlineIcon - badgeRoom));
 			var labelSize = ImGui.CalcTextSize(label);
 
 			float contentLeft;
 			float contentSpan;
-			Vector2 labelPosition;
+			float2 labelPosition;
 			if (stacked)
 			{
 				var blockHeight = (hasIcon ? iconSize.Y + (4f * scale) : 0f) + labelSize.Y;
 				var top = tabMin.Y + ((height - blockHeight) * 0.5f) - (1.5f * scale);
 				if (hasIcon)
 				{
-					M3Draw.Icon(drawList, tab.Icon, new Vector2(tabMin.X + ((tabWidth - iconSize.X) * 0.5f), top), content);
+					M3Draw.Icon(drawList, tab.Icon, new float2(tabMin.X + ((tabWidth - iconSize.X) * 0.5f), top), content);
 					top += iconSize.Y + (4f * scale);
 				}
 
-				labelPosition = new Vector2(tabMin.X + ((tabWidth - labelSize.X) * 0.5f), top);
+				labelPosition = new float2(tabMin.X + ((tabWidth - labelSize.X) * 0.5f), top);
 				contentSpan = MathF.Max(labelSize.X, iconSize.X);
 				contentLeft = tabMin.X + ((tabWidth - contentSpan) * 0.5f);
 			}
@@ -408,17 +405,17 @@ public static class M3Navigation
 				contentLeft = tabMin.X + ((tabWidth - contentSpan) * 0.5f);
 				if (hasIcon)
 				{
-					M3Draw.Icon(drawList, tab.Icon, new Vector2(contentLeft, tabMin.Y + ((height - iconSize.Y) * 0.5f)), content);
+					M3Draw.Icon(drawList, tab.Icon, new float2(contentLeft, tabMin.Y + ((height - iconSize.Y) * 0.5f)), content);
 				}
 
-				labelPosition = new Vector2(contentLeft + inlineIcon, tabMin.Y + ((height - labelSize.Y) * 0.5f));
+				labelPosition = new float2(contentLeft + inlineIcon, tabMin.Y + ((height - labelSize.Y) * 0.5f));
 			}
 
 			drawList.AddText(labelPosition, M3.U32(content), label);
 
 			if (badgeSize.X > 0f)
 			{
-				M3Widgets.BadgeAt(new Vector2(labelPosition.X + labelSize.X + (4f * scale) + (badgeSize.X * 0.5f), labelPosition.Y + (badgeSize.Y * 0.5f)), tab.Badge);
+				M3Widgets.BadgeAt(new float2(labelPosition.X + labelSize.X + (4f * scale) + (badgeSize.X * 0.5f), labelPosition.Y + (badgeSize.Y * 0.5f)), tab.Badge);
 			}
 
 			// Kept relative to the start of the tabs, so the indicator doesn't trail behind while they scroll.
@@ -445,19 +442,19 @@ public static class M3Navigation
 			var x = M3Motion.Approach("indicator_x", indicatorX, M3Motion.EmphasisedDuration);
 			var w = M3Motion.Approach("indicator_w", indicatorWidth, M3Motion.EmphasisedDuration);
 			var thickness = (secondary ? 2f : 3f) * scale;
-			var indicatorMin = new Vector2(contentOrigin + x, origin.Y + height - thickness);
-			drawList.AddRectFilled(indicatorMin, indicatorMin + new Vector2(w, thickness), M3.U32(s.Primary),
+			var indicatorMin = new float2(contentOrigin + x, origin.Y + height - thickness);
+			drawList.AddRectFilled(indicatorMin, indicatorMin + new float2(w, thickness), M3.U32(s.Primary),
 				secondary ? 0f : thickness, secondary ? ImDrawFlags.None : ImDrawFlags.RoundCornersTop);
 		}
 
 		ImGui.PopClipRect();
 
 		var divider = 1f * scale;
-		drawList.AddLine(new Vector2(origin.X, origin.Y + height - (divider * 0.5f)), new Vector2(origin.X + total, origin.Y + height - (divider * 0.5f)),
+		drawList.AddLine(new float2(origin.X, origin.Y + height - (divider * 0.5f)), new float2(origin.X + total, origin.Y + height - (divider * 0.5f)),
 			M3.U32(s.OutlineVariant, 0.8f), divider);
 
 		ImGui.SetCursorScreenPos(origin);
-		ImGui.Dummy(new Vector2(total, height));
+		ImGui.Dummy(new float2(total, height));
 		return result;
 	}
 

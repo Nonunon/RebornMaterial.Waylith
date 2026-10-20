@@ -1,5 +1,3 @@
-using Dalamud.Interface.Utility.Raii;
-
 namespace RebornMaterial;
 
 public static class M3TextField
@@ -12,7 +10,7 @@ public static class M3TextField
 		var scale = M3.Scale;
 		var height = Height;
 		var min = ImGui.GetCursorScreenPos();
-		var max = min + new Vector2(width, height);
+		var max = min + new float2(width, height);
 		var drawList = ImGui.GetWindowDrawList();
 		var hovered = ImGui.IsMouseHoveringRect(min, max) && ImGui.IsWindowHovered(ImGuiHoveredFlags.ChildWindows);
 
@@ -21,8 +19,8 @@ public static class M3TextField
 		drawList.AddRectFilled(min, max, M3.U32(fill), M3.ShapeExtraSmall, ImDrawFlags.RoundCornersTop);
 
 		// Vertical frame padding that makes the input exactly as tall as the container.
-		var padding = new Vector2(12f * scale, MathF.Max(0f, (height - ImGui.GetTextLineHeight()) * 0.5f));
-		var transparent = new Vector4(0f, 0f, 0f, 0f);
+		var padding = new float2(12f * scale, MathF.Max(0f, (height - ImGui.GetTextLineHeight()) * 0.5f));
+		var transparent = new float4(0f, 0f, 0f, 0f);
 		var flags = password ? ImGuiInputTextFlags.Password : ImGuiInputTextFlags.None;
 
 		bool changed;
@@ -33,13 +31,13 @@ public static class M3TextField
 		using (ImRaii.PushStyle(ImGuiStyleVar.FramePadding, padding))
 		{
 			ImGui.SetNextItemWidth(width);
-			changed = ImGui.InputTextWithHint("##field", hint, ref text, maxLength, flags);
+			changed = M3Input.TextWithHint("##field", hint, ref text, maxLength, flags);
 		}
 
 		var focused = ImGui.IsItemActive();
 		var thickness = (focused ? 2f : 1f) * scale;
 		var indicator = focused ? s.Primary : M3.Alpha(s.OnSurfaceVariant, hovered ? 1f : 0.7f);
-		drawList.AddRectFilled(new Vector2(min.X, max.Y - thickness), max, M3.U32(indicator));
+		drawList.AddRectFilled(new float2(min.X, max.Y - thickness), max, M3.U32(indicator));
 
 		return changed;
 	}

@@ -1,5 +1,3 @@
-using Dalamud.Interface.Utility.Raii;
-
 namespace RebornMaterial;
 
 public enum M3TextStyle
@@ -34,22 +32,22 @@ public static class M3Text
 		using var scope = Push(style);
 		if (wrap)
 		{
-			ImGui.TextWrapped(text);
+			ImGui.TextWrapped(text.Replace("%", "%%"));
 		}
 		else
 		{
-			ImGui.TextUnformatted(text);
+			ImGui.Text(text);
 		}
 	}
 
-	public static Vector2 Measure(string text, M3TextStyle style = M3TextStyle.Body)
+	public static float2 Measure(string text, M3TextStyle style = M3TextStyle.Body)
 	{
 		var font = FontOf(style);
 		using var pushed = ImRaii.PushFont(font.GetValueOrDefault(), font.HasValue);
 		return ImGui.CalcTextSize(text);
 	}
 
-	public static Vector4 ColorOf(M3TextStyle style)
+	public static float4 ColorOf(M3TextStyle style)
 	{
 		var s = M3.Scheme;
 		return style switch
@@ -65,7 +63,7 @@ public static class M3Text
 		};
 	}
 
-	public static ImFontPtr? FontOf(M3TextStyle style)
+	public static M3Font? FontOf(M3TextStyle style)
 	{
 		return style switch
 		{
@@ -82,7 +80,7 @@ public static class M3Text
 		var font = FontOf(style);
 		if (font is { } pushed)
 		{
-			ImGui.PushFont(pushed);
+			M3Fonts.Push(pushed);
 		}
 
 		ImGui.PushStyleColor(ImGuiCol.Text, ColorOf(style));

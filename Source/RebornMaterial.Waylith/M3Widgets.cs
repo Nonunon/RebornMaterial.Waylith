@@ -1,17 +1,14 @@
-using Dalamud.Interface.Textures.TextureWraps;
-using Dalamud.Interface.Utility.Raii;
-
 namespace RebornMaterial;
 
 public readonly record struct M3Segment(
 	string Label,
 	FontAwesomeIcon Icon = FontAwesomeIcon.None,
 	string? Tooltip = null,
-	Vector4? Accent = null);
+	float4? Accent = null);
 
 public readonly record struct M3WindowAction(string Id, FontAwesomeIcon Icon, string Tooltip);
 
-public readonly record struct M3WindowBrand(IDalamudTextureWrap? Logo, string Label, FontAwesomeIcon FallbackIcon = FontAwesomeIcon.Fire);
+public readonly record struct M3WindowBrand(IM3Texture? Logo, string Label, FontAwesomeIcon FallbackIcon = FontAwesomeIcon.Fire);
 
 public enum M3ButtonStyle
 {
@@ -30,9 +27,9 @@ public static partial class M3Widgets
 {
 	#region Switch
 
-	public static Vector2 SwitchSize()
+	public static float2 SwitchSize()
 	{
-		return new Vector2(52f, 32f) * M3.Scale;
+		return new float2(52f, 32f) * M3.Scale;
 	}
 
 	public static bool Switch(string id, ref bool value, bool enabled = true)
@@ -54,7 +51,7 @@ public static partial class M3Widgets
 		var drawList = ImGui.GetWindowDrawList();
 		var dim = enabled ? 1f : M3.DisabledContent;
 
-		var trackSize = new Vector2(48f, 28f) * scale;
+		var trackSize = new float2(48f, 28f) * scale;
 		var trackMin = min + ((size - trackSize) * 0.5f);
 		var trackMax = trackMin + trackSize;
 		var trackRadius = trackSize.Y * 0.5f;
@@ -80,7 +77,7 @@ public static partial class M3Widgets
 		var thumbRadius = thumbDiameter * 0.5f;
 		var travelStart = trackMin.X + (4f * scale) + (8f * scale);
 		var travelEnd = trackMax.X - (4f * scale) - (12f * scale);
-		var thumbCenter = new Vector2(float.Lerp(travelStart, travelEnd, progress), trackMin.Y + trackRadius);
+		var thumbCenter = new float2(float.Lerp(travelStart, travelEnd, progress), trackMin.Y + trackRadius);
 		var thumbColor = M3ColorMath.Mix(s.Outline, s.OnPrimary, progress);
 
 		if (hovered || held)
@@ -96,12 +93,12 @@ public static partial class M3Widgets
 			var tick = thumbRadius * 0.45f;
 			var checkColor = M3.U32(s.OnPrimaryContainer, (progress - 0.55f) / 0.45f * dim);
 			drawList.AddLine(
-				thumbCenter + new Vector2(-tick, 0f),
-				thumbCenter + new Vector2(-tick * 0.2f, tick * 0.7f),
+				thumbCenter + new float2(-tick, 0f),
+				thumbCenter + new float2(-tick * 0.2f, tick * 0.7f),
 				checkColor, 2f * scale);
 			drawList.AddLine(
-				thumbCenter + new Vector2(-tick * 0.2f, tick * 0.7f),
-				thumbCenter + new Vector2(tick, -tick * 0.6f),
+				thumbCenter + new float2(-tick * 0.2f, tick * 0.7f),
+				thumbCenter + new float2(tick, -tick * 0.6f),
 				checkColor, 2f * scale);
 		}
 
@@ -113,15 +110,15 @@ public static partial class M3Widgets
 
 	#region Checkbox
 
-	public static Vector2 CheckboxSize()
+	public static float2 CheckboxSize()
 	{
-		return new Vector2(20f, 20f) * M3.Scale;
+		return new float2(20f, 20f) * M3.Scale;
 	}
 
 	// Mixed draws a dash, for a box that stands for several values that don't agree. A click still flips value.
 	public static bool Checkbox(string id, ref bool value, bool enabled = true, bool mixed = false)
 	{
-		var hit = CheckboxSize() + (new Vector2(8f, 8f) * M3.Scale);
+		var hit = CheckboxSize() + (new float2(8f, 8f) * M3.Scale);
 
 		var changed = false;
 		if (ImGui.InvisibleButton(id, hit) && enabled)
@@ -156,8 +153,8 @@ public static partial class M3Widgets
 		var s = M3.Scheme;
 		var scale = M3.Scale;
 		var (display, id) = SplitLabel(label);
-		var hit = CheckboxSize() + (new Vector2(8f, 8f) * scale);
-		var size = new Vector2(LabeledCheckboxWidth(label), MathF.Max(hit.Y, ImGui.GetFrameHeight()));
+		var hit = CheckboxSize() + (new float2(8f, 8f) * scale);
+		var size = new float2(LabeledCheckboxWidth(label), MathF.Max(hit.Y, ImGui.GetFrameHeight()));
 
 		var changed = false;
 		if (ImGui.InvisibleButton(id, size) && enabled)
@@ -171,10 +168,10 @@ public static partial class M3Widgets
 		var held = enabled && ImGui.IsItemActive();
 		var min = ImGui.GetItemRectMin();
 		var drawList = ImGui.GetWindowDrawList();
-		DrawCheckbox(drawList, new Vector2(min.X + (hit.X * 0.5f), min.Y + (size.Y * 0.5f)), ImGui.GetID(id), value, mixed, hovered, held, enabled);
+		DrawCheckbox(drawList, new float2(min.X + (hit.X * 0.5f), min.Y + (size.Y * 0.5f)), ImGui.GetID(id), value, mixed, hovered, held, enabled);
 
 		var textSize = ImGui.CalcTextSize(display);
-		drawList.AddText(new Vector2(min.X + hit.X + (4f * scale), min.Y + ((size.Y - textSize.Y) * 0.5f)),
+		drawList.AddText(new float2(min.X + hit.X + (4f * scale), min.Y + ((size.Y - textSize.Y) * 0.5f)),
 			M3.U32(s.OnSurface, enabled ? 0.95f : M3.DisabledContent), display);
 		M3Draw.FocusRing(min, min + size, M3.ShapeSmall);
 
@@ -191,7 +188,7 @@ public static partial class M3Widgets
 		return changed;
 	}
 
-	private static void DrawCheckbox(ImDrawListPtr drawList, Vector2 center, uint id, bool value, bool mixed, bool hovered, bool held, bool enabled)
+	private static void DrawCheckbox(ImDrawListPtr drawList, float2 center, uint id, bool value, bool mixed, bool hovered, bool held, bool enabled)
 	{
 		var s = M3.Scheme;
 		var scale = M3.Scale;
@@ -227,21 +224,21 @@ public static partial class M3Widgets
 		var color = M3.U32(enabled ? s.OnPrimary : s.Surface, progress);
 		if (mixed)
 		{
-			drawList.AddLine(center - new Vector2(tick, 0f), center + new Vector2(tick, 0f), color, 2f * scale);
+			drawList.AddLine(center - new float2(tick, 0f), center + new float2(tick, 0f), color, 2f * scale);
 			return;
 		}
 
-		drawList.AddLine(center + new Vector2(-tick, 0f), center + new Vector2(-tick * 0.25f, tick * 0.8f), color, 2f * scale);
-		drawList.AddLine(center + new Vector2(-tick * 0.25f, tick * 0.8f), center + new Vector2(tick, -tick * 0.7f), color, 2f * scale);
+		drawList.AddLine(center + new float2(-tick, 0f), center + new float2(-tick * 0.25f, tick * 0.8f), color, 2f * scale);
+		drawList.AddLine(center + new float2(-tick * 0.25f, tick * 0.8f), center + new float2(tick, -tick * 0.7f), color, 2f * scale);
 	}
 
 	#endregion
 
 	#region Radio buttons
 
-	public static Vector2 RadioSize()
+	public static float2 RadioSize()
 	{
-		return new Vector2(28f, 28f) * M3.Scale;
+		return new float2(28f, 28f) * M3.Scale;
 	}
 
 	public static bool RadioButton(string id, bool selected, bool enabled = true)
@@ -287,7 +284,7 @@ public static partial class M3Widgets
 				ImGui.SameLine(0f, 8f * scale);
 			}
 
-			if (ImGui.InvisibleButton($"##option{i}", new Vector2(width, height)) && enabled && !selected)
+			if (ImGui.InvisibleButton($"##option{i}", new float2(width, height)) && enabled && !selected)
 			{
 				result = i;
 			}
@@ -296,12 +293,12 @@ public static partial class M3Widgets
 			var held = enabled && ImGui.IsItemActive();
 			var min = ImGui.GetItemRectMin();
 			var drawList = ImGui.GetWindowDrawList();
-			var center = new Vector2(min.X + (radio.X * 0.5f), min.Y + (height * 0.5f));
+			var center = new float2(min.X + (radio.X * 0.5f), min.Y + (height * 0.5f));
 			var progress = M3Motion.Approach(ImGui.GetID($"##option{i}"), selected ? 1f : 0f, M3Motion.FastDuration);
 
 			DrawRadio(drawList, center, radio.X, progress, selected, hovered, held, enabled);
 
-			drawList.AddText(new Vector2(min.X + radio.X + labelGap, min.Y + ((height - textSize.Y) * 0.5f)),
+			drawList.AddText(new float2(min.X + radio.X + labelGap, min.Y + ((height - textSize.Y) * 0.5f)),
 				M3.U32(s.OnSurface, enabled ? 0.95f : M3.DisabledContent), options[i]);
 			M3Draw.FocusRing(min, ImGui.GetItemRectMax(), M3.ShapeSmall);
 
@@ -314,7 +311,7 @@ public static partial class M3Widgets
 		return result;
 	}
 
-	private static void DrawRadio(ImDrawListPtr drawList, Vector2 center, float hit, float progress, bool selected, bool hovered, bool held, bool enabled)
+	private static void DrawRadio(ImDrawListPtr drawList, float2 center, float hit, float progress, bool selected, bool hovered, bool held, bool enabled)
 	{
 		var s = M3.Scheme;
 		var scale = M3.Scale;
@@ -342,18 +339,18 @@ public static partial class M3Widgets
 
 	private static float TextureIconSize => MathF.Max(18f * M3.Scale, ImGui.GetTextLineHeight());
 
-	private static float IconSlotWidth(FontAwesomeIcon icon, IDalamudTextureWrap? texture)
+	private static float IconSlotWidth(FontAwesomeIcon icon, IM3Texture? texture)
 	{
 		return texture != null ? TextureIconSize : icon == FontAwesomeIcon.None ? 0f : M3Draw.MeasureIcon(icon).X;
 	}
 
 	// A texture wins over the icon. While the texture is still loading, the icon shows in its place.
-	private static void DrawIconSlot(ImDrawListPtr drawList, FontAwesomeIcon icon, IDalamudTextureWrap? texture, float x, float top, float height, Vector4 color, float alpha = 1f)
+	private static void DrawIconSlot(ImDrawListPtr drawList, FontAwesomeIcon icon, IM3Texture? texture, float x, float top, float height, float4 color, float alpha = 1f)
 	{
 		if (texture != null)
 		{
 			var size = TextureIconSize;
-			if (M3Draw.Texture(drawList, texture, new Vector2(x, top + ((height - size) * 0.5f)), size, alpha))
+			if (M3Draw.Texture(drawList, texture, new float2(x, top + ((height - size) * 0.5f)), size, alpha))
 			{
 				return;
 			}
@@ -362,11 +359,11 @@ public static partial class M3Widgets
 		if (icon != FontAwesomeIcon.None)
 		{
 			var iconSize = M3Draw.MeasureIcon(icon);
-			M3Draw.Icon(drawList, icon, new Vector2(x, top + ((height - iconSize.Y) * 0.5f)), color);
+			M3Draw.Icon(drawList, icon, new float2(x, top + ((height - iconSize.Y) * 0.5f)), color);
 		}
 	}
 
-	public static float ButtonWidth(FontAwesomeIcon icon, string label, IDalamudTextureWrap? texture = null)
+	public static float ButtonWidth(FontAwesomeIcon icon, string label, IM3Texture? texture = null)
 	{
 		var scale = M3.Scale;
 		var width = 24f * scale * 2f;
@@ -384,7 +381,7 @@ public static partial class M3Widgets
 		return MathF.Max(width, 64f * scale);
 	}
 
-	private static (Vector4 Container, Vector4 Content, Vector4? Outline) ButtonColors(M3ButtonStyle style, Vector4? accent)
+	private static (float4 Container, float4 Content, float4? Outline) ButtonColors(M3ButtonStyle style, float4? accent)
 	{
 		var s = M3.Scheme;
 		var clear = M3.Alpha(s.Surface, 0f);
@@ -412,12 +409,12 @@ public static partial class M3Widgets
 	}
 
 	// The tooltip also shows while disabled, so it can say why.
-	public static bool Button(string id, string label, M3ButtonStyle style = M3ButtonStyle.Tonal, FontAwesomeIcon icon = FontAwesomeIcon.None, float? width = null, bool enabled = true, string? tooltip = null, Vector4? accent = null, IDalamudTextureWrap? texture = null)
+	public static bool Button(string id, string label, M3ButtonStyle style = M3ButtonStyle.Tonal, FontAwesomeIcon icon = FontAwesomeIcon.None, float? width = null, bool enabled = true, string? tooltip = null, float4? accent = null, IM3Texture? texture = null)
 	{
 		var s = M3.Scheme;
 		var scale = M3.Scale;
 		var height = ButtonHeight;
-		var size = new Vector2(width ?? ButtonWidth(icon, label, texture), height);
+		var size = new float2(width ?? ButtonWidth(icon, label, texture), height);
 
 		var pressed = ImGui.InvisibleButton(id, size) && enabled;
 		var mouseOver = ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenBlockedByActiveItem);
@@ -447,7 +444,7 @@ public static partial class M3Widgets
 
 		var iconWidth = IconSlotWidth(icon, texture);
 		var gap = iconWidth <= 0f || string.IsNullOrEmpty(label) ? 0f : 8f * scale;
-		var textSize = string.IsNullOrEmpty(label) ? Vector2.Zero : ImGui.CalcTextSize(label);
+		var textSize = string.IsNullOrEmpty(label) ? float2.Zero : ImGui.CalcTextSize(label);
 		var contentWidth = iconWidth + gap + textSize.X;
 		var cursorX = min.X + ((size.X - contentWidth) * 0.5f);
 
@@ -459,7 +456,7 @@ public static partial class M3Widgets
 
 		if (!string.IsNullOrEmpty(label))
 		{
-			drawList.AddText(new Vector2(cursorX, min.Y + ((height - textSize.Y) * 0.5f)), M3.U32(content), label);
+			drawList.AddText(new float2(cursorX, min.Y + ((height - textSize.Y) * 0.5f)), M3.U32(content), label);
 		}
 
 		M3Draw.FocusRing(min, max, rounding);
@@ -513,7 +510,7 @@ public static partial class M3Widgets
 		{
 			var content = ButtonColors(style, null).Content;
 			var drawList = ImGui.GetWindowDrawList();
-			drawList.PushClipRect(min, new Vector2(float.Lerp(min.X, max.X, shown), max.Y), true);
+			drawList.PushClipRect(min, new float2(float.Lerp(min.X, max.X, shown), max.Y), true);
 			drawList.AddRectFilled(min, max, M3.U32(content, 0.22f), (max.Y - min.Y) * 0.5f);
 			drawList.PopClipRect();
 		}
@@ -523,10 +520,10 @@ public static partial class M3Widgets
 
 	public static float IconButtonSize => 36f * M3.Scale;
 
-	public static bool IconButton(string id, FontAwesomeIcon icon, string? tooltip = null, M3ButtonStyle style = M3ButtonStyle.Text, Vector4? tint = null, float? diameter = null, bool enabled = true)
+	public static bool IconButton(string id, FontAwesomeIcon icon, string? tooltip = null, M3ButtonStyle style = M3ButtonStyle.Text, float4? tint = null, float? diameter = null, bool enabled = true)
 	{
 		var s = M3.Scheme;
-		var size = Vector2.One * (diameter ?? IconButtonSize);
+		var size = float2.One * (diameter ?? IconButtonSize);
 
 		var pressed = ImGui.InvisibleButton(id, size) && enabled;
 		var mouseOver = ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenBlockedByActiveItem);
@@ -565,7 +562,7 @@ public static partial class M3Widgets
 		return pressed;
 	}
 
-	private static void DrawIconButton(ImDrawListPtr drawList, FontAwesomeIcon icon, Vector2 min, Vector2 max, Vector4 container, Vector4 content, bool outlined, bool hovered, bool held, bool enabled)
+	private static void DrawIconButton(ImDrawListPtr drawList, FontAwesomeIcon icon, float2 min, float2 max, float4 container, float4 content, bool outlined, bool hovered, bool held, bool enabled)
 	{
 		var s = M3.Scheme;
 		var center = (min + max) * 0.5f;
@@ -599,7 +596,7 @@ public static partial class M3Widgets
 	public static bool IconToggle(string id, FontAwesomeIcon icon, ref bool selected, string? tooltip = null, M3ButtonStyle style = M3ButtonStyle.Text, FontAwesomeIcon selectedIcon = FontAwesomeIcon.None, float? diameter = null, bool enabled = true)
 	{
 		var s = M3.Scheme;
-		var size = Vector2.One * (diameter ?? IconButtonSize);
+		var size = float2.One * (diameter ?? IconButtonSize);
 
 		var pressed = ImGui.InvisibleButton(id, size) && enabled;
 		if (pressed)
@@ -650,27 +647,27 @@ public static partial class M3Widgets
 	private static float WindowActionsDividerGap => 8f * M3.Scale;
 	private static float WindowBrandLogoSize => 24f * M3.Scale;
 
-	public static Vector2 WindowActionsSize(int actionCount)
+	public static float2 WindowActionsSize(int actionCount)
 	{
 		return WindowActionsSize(ActionsWidth(actionCount), 1);
 	}
 
-	public static Vector2 WindowActionsSize(int actionCount, in M3WindowBrand brand, float minimized)
+	public static float2 WindowActionsSize(int actionCount, in M3WindowBrand brand, float minimized)
 	{
 		return WindowActionsSize(LeadingWidth(actionCount, brand, minimized), 2);
 	}
 
-	public static int WindowActions(string id, Vector2 topRight, ReadOnlySpan<M3WindowAction> actions, out bool closed, Vector4? fill = null, string closeTooltip = "Close")
+	public static int WindowActions(string id, float2 topRight, ReadOnlySpan<M3WindowAction> actions, out bool closed, float4? fill = null, string closeTooltip = "Close")
 	{
 		return DrawWindowActions(id, topRight, actions, null, 0f, out _, out closed, fill, closeTooltip);
 	}
 
-	public static int WindowActions(string id, Vector2 topRight, ReadOnlySpan<M3WindowAction> actions, in M3WindowBrand brand, float minimized, out bool toggled, out bool closed, Vector4? fill = null, string closeTooltip = "Close")
+	public static int WindowActions(string id, float2 topRight, ReadOnlySpan<M3WindowAction> actions, in M3WindowBrand brand, float minimized, out bool toggled, out bool closed, float4? fill = null, string closeTooltip = "Close")
 	{
 		return DrawWindowActions(id, topRight, actions, brand, minimized, out toggled, out closed, fill, closeTooltip);
 	}
 
-	private static int DrawWindowActions(string id, Vector2 topRight, ReadOnlySpan<M3WindowAction> actions, M3WindowBrand? brand, float minimized, out bool toggled, out bool closed, Vector4? fill, string closeTooltip)
+	private static int DrawWindowActions(string id, float2 topRight, ReadOnlySpan<M3WindowAction> actions, M3WindowBrand? brand, float minimized, out bool toggled, out bool closed, float4? fill, string closeTooltip)
 	{
 		var s = M3.Scheme;
 		var scale = M3.Scale;
@@ -682,7 +679,7 @@ public static partial class M3Widgets
 		var leading = brand is { } measured ? LeadingWidth(actions.Length, measured, minimized) : ActionsWidth(actions.Length);
 		var size = WindowActionsSize(leading, brand is null ? 1 : 2);
 
-		var min = new Vector2(topRight.X - size.X, topRight.Y);
+		var min = new float2(topRight.X - size.X, topRight.Y);
 		var drawList = ImGui.GetWindowDrawList();
 		drawList.AddRectFilled(min, min + size, M3.U32(fill ?? M3.Alpha(s.Surface, 0.72f)), M3.ShapeFull);
 
@@ -691,7 +688,7 @@ public static partial class M3Widgets
 		var x = min.X + padding;
 		var y = min.Y + padding;
 
-		ImGui.PushClipRect(new Vector2(x, y), new Vector2(x + leading, y + buttonSize), true);
+		ImGui.PushClipRect(new float2(x, y), new float2(x + leading, y + buttonSize), true);
 		var actionsAlpha = Math.Clamp(1f - (minimized * 2f), 0f, 1f);
 		if (actionsAlpha > 0f)
 		{
@@ -700,7 +697,7 @@ public static partial class M3Widgets
 			for (var i = 0; i < actions.Length; i++)
 			{
 				var action = actions[i];
-				ImGui.SetCursorScreenPos(new Vector2(actionX, y));
+				ImGui.SetCursorScreenPos(new float2(actionX, y));
 				if (IconButton(action.Id, action.Icon, action.Tooltip))
 				{
 					result = i;
@@ -713,7 +710,7 @@ public static partial class M3Widgets
 		if (brand is { } shown && minimized > 0.5f)
 		{
 			using var alpha = ImRaii.PushStyle(ImGuiStyleVar.Alpha, ImGui.GetStyle().Alpha * ((minimized * 2f) - 1f));
-			DrawWindowBrand(drawList, shown, new Vector2(x, y), buttonSize);
+			DrawWindowBrand(drawList, shown, new float2(x, y), buttonSize);
 		}
 
 		ImGui.PopClipRect();
@@ -723,7 +720,7 @@ public static partial class M3Widgets
 		if (dividerRoom > 0f)
 		{
 			x += dividerRoom;
-			drawList.AddLine(new Vector2(x, y + (8f * scale)), new Vector2(x, y + buttonSize - (8f * scale)),
+			drawList.AddLine(new float2(x, y + (8f * scale)), new float2(x, y + buttonSize - (8f * scale)),
 				M3.U32(s.OutlineVariant, 0.9f * dividerRoom / WindowActionsDividerGap), 1f * scale);
 			x += dividerRoom;
 		}
@@ -731,22 +728,22 @@ public static partial class M3Widgets
 		toggled = false;
 		if (brand is not null)
 		{
-			ImGui.SetCursorScreenPos(new Vector2(x, y));
+			ImGui.SetCursorScreenPos(new float2(x, y));
 			toggled = CaretButton("##minimize", -MathF.PI * 0.5f * minimized, minimized < 0.5f ? "Minimize" : "Restore");
 			x += buttonSize + gap;
 		}
 
-		ImGui.SetCursorScreenPos(new Vector2(x, y));
+		ImGui.SetCursorScreenPos(new float2(x, y));
 		closed = IconButton("##close", FontAwesomeIcon.Times, closeTooltip);
 		return result;
 	}
 
-	private static Vector2 WindowActionsSize(float leading, int controls)
+	private static float2 WindowActionsSize(float leading, int controls)
 	{
 		var padding = WindowActionsPadding;
 		var width = (padding * 2f) + leading + (DividerRoom(leading) * 2f)
 			+ (IconButtonSize * controls) + (WindowActionsGap * (controls - 1));
-		return new Vector2(width, IconButtonSize + (padding * 2f));
+		return new float2(width, IconButtonSize + (padding * 2f));
 	}
 
 	private static float DividerRoom(float leading)
@@ -771,18 +768,18 @@ public static partial class M3Widgets
 		return (6f * scale) + WindowBrandLogoSize + (8f * scale) + ImGui.CalcTextSize(brand.Label).X + (4f * scale);
 	}
 
-	private static void DrawWindowBrand(ImDrawListPtr drawList, in M3WindowBrand brand, Vector2 origin, float height)
+	private static void DrawWindowBrand(ImDrawListPtr drawList, in M3WindowBrand brand, float2 origin, float height)
 	{
 		var s = M3.Scheme;
 		var scale = M3.Scale;
 		var logoSize = WindowBrandLogoSize;
-		var logoMin = new Vector2(origin.X + (6f * scale), origin.Y + ((height - logoSize) * 0.5f));
-		var logoMax = logoMin + new Vector2(logoSize, logoSize);
+		var logoMin = new float2(origin.X + (6f * scale), origin.Y + ((height - logoSize) * 0.5f));
+		var logoMax = logoMin + new float2(logoSize, logoSize);
 
 		var logo = brand.Logo;
 		if (logo?.Handle != null)
 		{
-			drawList.AddImageRounded(logo.Handle, logoMin, logoMax, Vector2.Zero, Vector2.One, M3.U32(Vector4.One), M3.ShapeExtraSmall);
+			drawList.AddImageRounded(logo.Handle, logoMin, logoMax, float2.Zero, float2.One, M3.U32(float4.One), M3.ShapeExtraSmall);
 		}
 		else
 		{
@@ -792,14 +789,14 @@ public static partial class M3Widgets
 
 		using var font = ImRaii.PushFont(M3.TitleMedium);
 		var labelSize = ImGui.CalcTextSize(brand.Label);
-		drawList.AddText(new Vector2(logoMax.X + (8f * scale), origin.Y + ((height - labelSize.Y) * 0.5f)), M3.U32(s.OnSurface), brand.Label);
+		drawList.AddText(new float2(logoMax.X + (8f * scale), origin.Y + ((height - labelSize.Y) * 0.5f)), M3.U32(s.OnSurface), brand.Label);
 	}
 
 	private static bool CaretButton(string id, float angle, string? tooltip)
 	{
 		var s = M3.Scheme;
 		var scale = M3.Scale;
-		var size = Vector2.One * IconButtonSize;
+		var size = float2.One * IconButtonSize;
 
 		var pressed = ImGui.InvisibleButton(id, size);
 		var hovered = ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenBlockedByActiveItem);
@@ -817,7 +814,7 @@ public static partial class M3Widgets
 		var halfWidth = 5f * scale;
 		var halfHeight = 3.5f * scale;
 		var (sin, cos) = MathF.SinCos(angle);
-		Vector2 Turn(float px, float py) => center + new Vector2((px * cos) - (py * sin), (px * sin) + (py * cos));
+		float2 Turn(float px, float py) => center + new float2((px * cos) - (py * sin), (px * sin) + (py * cos));
 		drawList.AddTriangleFilled(Turn(0f, halfHeight), Turn(-halfWidth, -halfHeight), Turn(halfWidth, -halfHeight), M3.U32(content));
 		M3Draw.FocusRing(ImGui.GetItemRectMin(), ImGui.GetItemRectMax(), size.X * 0.5f);
 
@@ -837,7 +834,7 @@ public static partial class M3Widgets
 	public static float SegmentedHeight => M3.FitText(32f, 6f);
 
 	// Measure with the same label font the buttons will use, or a smaller font gets the width of the body one.
-	public static float SegmentedWidth(ReadOnlySpan<M3Segment> segments, ImFontPtr? labelFont = null)
+	public static float SegmentedWidth(ReadOnlySpan<M3Segment> segments, M3Font? labelFont = null)
 	{
 		var scale = M3.Scale;
 		var widest = 0f;
@@ -858,7 +855,7 @@ public static partial class M3Widgets
 	}
 
 	// A label font only changes the text; the buttons keep their height and icons.
-	public static int SegmentedButtons(string id, ReadOnlySpan<M3Segment> segments, int selectedIndex, float? width = null, ImFontPtr? labelFont = null, bool enabled = true)
+	public static int SegmentedButtons(string id, ReadOnlySpan<M3Segment> segments, int selectedIndex, float? width = null, M3Font? labelFont = null, bool enabled = true)
 	{
 		if (segments.Length == 0)
 		{
@@ -881,10 +878,10 @@ public static partial class M3Widgets
 		{
 			var segment = segments[i];
 			var selected = i == selectedIndex;
-			var segmentMin = new Vector2(origin.X + (segmentWidth * i), origin.Y);
+			var segmentMin = new float2(origin.X + (segmentWidth * i), origin.Y);
 
 			ImGui.SetCursorScreenPos(segmentMin);
-			if (ImGui.InvisibleButton($"##segment{i}", new Vector2(segmentWidth, height)) && !selected && enabled)
+			if (ImGui.InvisibleButton($"##segment{i}", new float2(segmentWidth, height)) && !selected && enabled)
 			{
 				result = i;
 			}
@@ -892,7 +889,7 @@ public static partial class M3Widgets
 			var mouseOver = ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenBlockedByActiveItem);
 			var hovered = enabled && mouseOver;
 			var held = enabled && ImGui.IsItemActive();
-			var segmentMax = segmentMin + new Vector2(segmentWidth, height);
+			var segmentMax = segmentMin + new float2(segmentWidth, height);
 			var tone = enabled ? segment.Accent ?? s.Primary : M3.Alpha(s.OnSurface, M3.DisabledContent);
 
 			var corners = segments.Length == 1 ? ImDrawFlags.RoundCornersAll
@@ -927,16 +924,16 @@ public static partial class M3Widgets
 
 				if (segment.Icon != FontAwesomeIcon.None)
 				{
-					M3Draw.Icon(drawList, segment.Icon, new Vector2(cursorX, iconTop), content);
+					M3Draw.Icon(drawList, segment.Icon, new float2(cursorX, iconTop), content);
 					cursorX += iconWidth + gap;
 				}
 
-				drawList.AddText(new Vector2(cursorX, segmentMin.Y + ((height - textSize.Y) * 0.5f)), M3.U32(content), segment.Label);
+				drawList.AddText(new float2(cursorX, segmentMin.Y + ((height - textSize.Y) * 0.5f)), M3.U32(content), segment.Label);
 			}
 
 			if (i > 0)
 			{
-				drawList.AddLine(segmentMin + new Vector2(0f, 1f * scale), new Vector2(segmentMin.X, segmentMax.Y - (1f * scale)),
+				drawList.AddLine(segmentMin + new float2(0f, 1f * scale), new float2(segmentMin.X, segmentMax.Y - (1f * scale)),
 					M3.U32(s.Outline, 0.55f), 1f * scale);
 			}
 
@@ -948,11 +945,11 @@ public static partial class M3Widgets
 			}
 		}
 
-		drawList.AddRect(origin, origin + new Vector2(total, height), M3.U32(s.Outline, 0.65f),
+		drawList.AddRect(origin, origin + new float2(total, height), M3.U32(s.Outline, 0.65f),
 			rounding, ImDrawFlags.RoundCornersAll, 1f * scale);
 
 		ImGui.SetCursorScreenPos(origin);
-		ImGui.Dummy(new Vector2(total, height));
+		ImGui.Dummy(new float2(total, height));
 		return result;
 	}
 
@@ -962,7 +959,7 @@ public static partial class M3Widgets
 
 	public static float ChipHeight => M3.FitText(32f, 6f);
 
-	public static float ChipWidth(string label, FontAwesomeIcon icon = FontAwesomeIcon.None, FontAwesomeIcon trailingIcon = FontAwesomeIcon.None, IDalamudTextureWrap? texture = null)
+	public static float ChipWidth(string label, FontAwesomeIcon icon = FontAwesomeIcon.None, FontAwesomeIcon trailingIcon = FontAwesomeIcon.None, IM3Texture? texture = null)
 	{
 		var scale = M3.Scale;
 		var width = ImGui.CalcTextSize(label).X + (16f * scale * 2f);
@@ -980,12 +977,12 @@ public static partial class M3Widgets
 		return width;
 	}
 
-	public static bool Chip(string id, string label, bool selected, FontAwesomeIcon icon = FontAwesomeIcon.None, string? tooltip = null, Vector4? accent = null, FontAwesomeIcon trailingIcon = FontAwesomeIcon.None, bool enabled = true, IDalamudTextureWrap? texture = null)
+	public static bool Chip(string id, string label, bool selected, FontAwesomeIcon icon = FontAwesomeIcon.None, string? tooltip = null, float4? accent = null, FontAwesomeIcon trailingIcon = FontAwesomeIcon.None, bool enabled = true, IM3Texture? texture = null)
 	{
 		var s = M3.Scheme;
 		var scale = M3.Scale;
 		var height = ChipHeight;
-		var size = new Vector2(ChipWidth(label, icon, trailingIcon, texture), height);
+		var size = new float2(ChipWidth(label, icon, trailingIcon, texture), height);
 		var tone = accent ?? s.Primary;
 
 		var pressed = ImGui.InvisibleButton(id, size) && enabled;
@@ -999,7 +996,7 @@ public static partial class M3Widgets
 
 		var container = selected ? s.SecondaryContainer : M3.Alpha(s.Surface, 0f);
 		var content = selected ? s.OnSecondaryContainer : s.OnSurfaceVariant;
-		var outline = selected ? (Vector4?)null : M3.Alpha(s.Outline, 0.8f);
+		var outline = selected ? (float4?)null : M3.Alpha(s.Outline, 0.8f);
 		if (!enabled)
 		{
 			container = selected ? M3.Alpha(s.OnSurface, M3.DisabledContainer) : container;
@@ -1028,13 +1025,13 @@ public static partial class M3Widgets
 			cursorX += iconWidth + gap;
 		}
 
-		drawList.AddText(new Vector2(cursorX, min.Y + ((height - textSize.Y) * 0.5f)), M3.U32(content), label);
+		drawList.AddText(new float2(cursorX, min.Y + ((height - textSize.Y) * 0.5f)), M3.U32(content), label);
 
 		if (trailingIcon != FontAwesomeIcon.None)
 		{
 			var trailingSize = M3Draw.MeasureIcon(trailingIcon);
 			M3Draw.Icon(drawList, trailingIcon,
-				new Vector2(cursorX + textSize.X + (8f * scale), min.Y + ((height - trailingSize.Y) * 0.5f)), content);
+				new float2(cursorX + textSize.X + (8f * scale), min.Y + ((height - trailingSize.Y) * 0.5f)), content);
 		}
 
 		M3Draw.FocusRing(min, max, rounding);
@@ -1052,17 +1049,17 @@ public static partial class M3Widgets
 		return pressed;
 	}
 
-	public static Vector2 PillSize(string label, FontAwesomeIcon icon = FontAwesomeIcon.None)
+	public static float2 PillSize(string label, FontAwesomeIcon icon = FontAwesomeIcon.None)
 	{
 		var scale = M3.Scale;
 		var width = ImGui.CalcTextSize(label).X + (12f * scale * 2f);
 		width += icon == FontAwesomeIcon.None
 			? (6f * scale) + (6f * scale)
 			: M3Draw.MeasureIcon(icon).X + (6f * scale);
-		return new Vector2(width, M3.FitText(24f, 3f));
+		return new float2(width, M3.FitText(24f, 3f));
 	}
 
-	public static bool Pill(string id, string label, Vector4 accent, FontAwesomeIcon icon = FontAwesomeIcon.None, string? tooltip = null, bool interactive = false)
+	public static bool Pill(string id, string label, float4 accent, FontAwesomeIcon icon = FontAwesomeIcon.None, string? tooltip = null, bool interactive = false)
 	{
 		var scale = M3.Scale;
 		var size = PillSize(label, icon);
@@ -1090,23 +1087,23 @@ public static partial class M3Widgets
 		if (icon == FontAwesomeIcon.None)
 		{
 			var radius = 3f * scale;
-			drawList.AddCircleFilled(new Vector2(cursorX + radius, min.Y + (size.Y * 0.5f)), radius, M3.U32(accent), 12);
+			drawList.AddCircleFilled(new float2(cursorX + radius, min.Y + (size.Y * 0.5f)), radius, M3.U32(accent), 12);
 			cursorX += (radius * 2f) + (6f * scale);
 		}
 		else
 		{
-			using (ImRaii.PushFont(UiBuilder.IconFont))
+			using (ImRaii.PushFont(M3Icons.Font))
 			{
 				var glyph = icon.ToIconString();
 				var glyphSize = ImGui.CalcTextSize(glyph);
-				drawList.AddText(UiBuilder.IconFont, ImGui.GetFontSize(),
-					new Vector2(cursorX, min.Y + ((size.Y - glyphSize.Y) * 0.5f)), M3.U32(accent), glyph);
+				drawList.AddText(M3Icons.Font, ImGui.GetFontSize(),
+					new float2(cursorX, min.Y + ((size.Y - glyphSize.Y) * 0.5f)), M3.U32(accent), glyph);
 				cursorX += glyphSize.X + (6f * scale);
 			}
 		}
 
 		var textSize = ImGui.CalcTextSize(label);
-		drawList.AddText(new Vector2(cursorX, min.Y + ((size.Y - textSize.Y) * 0.5f)), M3.U32(M3.Scheme.OnSurface, 0.95f), label);
+		drawList.AddText(new float2(cursorX, min.Y + ((size.Y - textSize.Y) * 0.5f)), M3.U32(M3.Scheme.OnSurface, 0.95f), label);
 
 		if (interactive)
 		{
@@ -1135,7 +1132,7 @@ public static partial class M3Widgets
 		return width;
 	}
 
-	public static bool InputChip(string id, string label, out bool removed, FontAwesomeIcon icon = FontAwesomeIcon.None, string? tooltip = null, Vector4? accent = null)
+	public static bool InputChip(string id, string label, out bool removed, FontAwesomeIcon icon = FontAwesomeIcon.None, string? tooltip = null, float4? accent = null)
 	{
 		var s = M3.Scheme;
 		var scale = M3.Scale;
@@ -1144,15 +1141,15 @@ public static partial class M3Widgets
 		var removeWidth = InputChipRemoveWidth;
 		var tone = accent ?? s.Primary;
 
-		var pressed = ImGui.InvisibleButton(id, new Vector2(width - removeWidth, height));
+		var pressed = ImGui.InvisibleButton(id, new float2(width - removeWidth, height));
 		var bodyHovered = ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenBlockedByActiveItem);
 		var bodyHeld = ImGui.IsItemActive();
 		var min = ImGui.GetItemRectMin();
-		var max = min + new Vector2(width, height);
+		var max = min + new float2(width, height);
 		M3Draw.FocusRing(min, max, M3.ShapeSmall);
 
 		ImGui.SameLine(0f, 0f);
-		removed = ImGui.InvisibleButton($"{id}_remove", new Vector2(removeWidth, height));
+		removed = ImGui.InvisibleButton($"{id}_remove", new float2(removeWidth, height));
 		var removeHovered = ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenBlockedByActiveItem);
 		var removeHeld = ImGui.IsItemActive();
 		M3Draw.FocusRing(ImGui.GetItemRectMin(), ImGui.GetItemRectMax(), height * 0.5f);
@@ -1173,15 +1170,15 @@ public static partial class M3Widgets
 		if (icon != FontAwesomeIcon.None)
 		{
 			var iconSize = M3Draw.MeasureIcon(icon);
-			M3Draw.Icon(drawList, icon, new Vector2(cursorX, min.Y + ((height - iconSize.Y) * 0.5f)), tone);
+			M3Draw.Icon(drawList, icon, new float2(cursorX, min.Y + ((height - iconSize.Y) * 0.5f)), tone);
 			cursorX += iconSize.X + (8f * scale);
 		}
 
 		var textSize = ImGui.CalcTextSize(label);
-		drawList.AddText(new Vector2(cursorX, min.Y + ((height - textSize.Y) * 0.5f)), M3.U32(content), label);
+		drawList.AddText(new float2(cursorX, min.Y + ((height - textSize.Y) * 0.5f)), M3.U32(content), label);
 
-		var removeMin = new Vector2(max.X - removeWidth, min.Y);
-		var removeCenter = removeMin + (new Vector2(removeWidth, height) * 0.5f);
+		var removeMin = new float2(max.X - removeWidth, min.Y);
+		var removeCenter = removeMin + (new float2(removeWidth, height) * 0.5f);
 		if (removeHovered || removeHeld)
 		{
 			drawList.AddCircleFilled(removeCenter, height * 0.36f, M3.U32(s.OnSurface, removeHeld ? M3.StatePressed : M3.StateHover), 24);
@@ -1189,8 +1186,8 @@ public static partial class M3Widgets
 
 		var arm = 4f * scale;
 		var crossColor = M3.U32(removeHovered ? s.OnSurface : content);
-		drawList.AddLine(removeCenter - new Vector2(arm, arm), removeCenter + new Vector2(arm, arm), crossColor, 1.5f * scale);
-		drawList.AddLine(removeCenter + new Vector2(-arm, arm), removeCenter + new Vector2(arm, -arm), crossColor, 1.5f * scale);
+		drawList.AddLine(removeCenter - new float2(arm, arm), removeCenter + new float2(arm, arm), crossColor, 1.5f * scale);
+		drawList.AddLine(removeCenter + new float2(-arm, arm), removeCenter + new float2(arm, -arm), crossColor, 1.5f * scale);
 
 		if (bodyHovered || removeHovered)
 		{
@@ -1209,18 +1206,18 @@ public static partial class M3Widgets
 		return pressed;
 	}
 
-	public static Vector2 BadgeSize(string? text)
+	public static float2 BadgeSize(string? text)
 	{
 		var scale = M3.Scale;
 		if (string.IsNullOrEmpty(text))
 		{
-			return new Vector2(6f, 6f) * scale;
+			return new float2(6f, 6f) * scale;
 		}
 
 		using var font = ImRaii.PushFont(M3.LabelSmall);
 		var textSize = ImGui.CalcTextSize(text);
 		var height = MathF.Max(16f * scale, textSize.Y + (2f * scale));
-		return new Vector2(MathF.Max(height, textSize.X + (8f * scale)), height);
+		return new float2(MathF.Max(height, textSize.X + (8f * scale)), height);
 	}
 
 	public static string BadgeCount(int count)
@@ -1228,15 +1225,15 @@ public static partial class M3Widgets
 		return count > 999 ? "999+" : count.ToString();
 	}
 
-	public static void Badge(string? text = null, Vector4? color = null)
+	public static void Badge(string? text = null, float4? color = null)
 	{
 		var size = BadgeSize(text);
 		var min = ImGui.GetItemRectMin();
 		var max = ImGui.GetItemRectMax();
-		BadgeAt(new Vector2(max.X - (size.X * 0.5f), min.Y + (size.Y * 0.5f)), text, color);
+		BadgeAt(new float2(max.X - (size.X * 0.5f), min.Y + (size.Y * 0.5f)), text, color);
 	}
 
-	public static void BadgeAt(Vector2 center, string? text = null, Vector4? color = null)
+	public static void BadgeAt(float2 center, string? text = null, float4? color = null)
 	{
 		var s = M3.Scheme;
 		var drawList = ImGui.GetWindowDrawList();
@@ -1263,7 +1260,7 @@ public static partial class M3Widgets
 
 	#region Progress
 
-	public static void LinearProgress(Vector2 size, float fraction, float? marker = null, Vector4? markerColor = null)
+	public static void LinearProgress(float2 size, float fraction, float? marker = null, float4? markerColor = null)
 	{
 		var s = M3.Scheme;
 		var scale = M3.Scale;
@@ -1282,30 +1279,30 @@ public static partial class M3Widgets
 		var trackStart = MathF.Min(max.X, split + gap);
 		if (max.X - trackStart > 0.5f)
 		{
-			drawList.AddRectFilled(new Vector2(trackStart, min.Y), max, M3.U32(s.SecondaryContainer), rounding);
+			drawList.AddRectFilled(new float2(trackStart, min.Y), max, M3.U32(s.SecondaryContainer), rounding);
 
 			if (max.X - trackStart >= size.Y)
 			{
 				var stopRadius = MathF.Min(2f * scale, rounding);
-				drawList.AddCircleFilled(new Vector2(max.X - rounding, centerY), stopRadius, M3.U32(s.Primary), 12);
+				drawList.AddCircleFilled(new float2(max.X - rounding, centerY), stopRadius, M3.U32(s.Primary), 12);
 			}
 		}
 
 		if (split - min.X > 0.5f)
 		{
-			drawList.AddRectFilled(min, new Vector2(split, max.Y), M3.U32(s.Primary), rounding);
+			drawList.AddRectFilled(min, new float2(split, max.Y), M3.U32(s.Primary), rounding);
 		}
 
 		if (marker is { } at && at > 0f && at < 1f)
 		{
 			var x = float.Lerp(min.X, max.X, at);
 			var overhang = 2f * scale;
-			drawList.AddLine(new Vector2(x, min.Y - overhang), new Vector2(x, max.Y + overhang),
+			drawList.AddLine(new float2(x, min.Y - overhang), new float2(x, max.Y + overhang),
 				M3.U32(markerColor ?? s.Tertiary), 2f * scale);
 		}
 	}
 
-	public static void LinearProgressIndeterminate(Vector2 size)
+	public static void LinearProgressIndeterminate(float2 size)
 	{
 		var s = M3.Scheme;
 		var scale = M3.Scale;
@@ -1319,7 +1316,7 @@ public static partial class M3Widgets
 
 		const float Period = 2f;
 		var t = (float)(ImGui.GetTime() % Period) / Period;
-		Span<Vector2> segments =
+		Span<float2> segments =
 		[
 			new(Ease((t - 0.20f) / 0.60f), Ease(t / 0.55f)),
 			new(Ease((t - 0.70f) / 0.30f), Ease((t - 0.45f) / 0.40f)),
@@ -1342,16 +1339,16 @@ public static partial class M3Widgets
 
 			if (from - gap - trackStart > 0.5f)
 			{
-				drawList.AddRectFilled(new Vector2(trackStart, min.Y), new Vector2(from - gap, max.Y), M3.U32(s.SecondaryContainer), rounding);
+				drawList.AddRectFilled(new float2(trackStart, min.Y), new float2(from - gap, max.Y), M3.U32(s.SecondaryContainer), rounding);
 			}
 
-			drawList.AddRectFilled(new Vector2(from, min.Y), new Vector2(to, max.Y), M3.U32(s.Primary), rounding);
+			drawList.AddRectFilled(new float2(from, min.Y), new float2(to, max.Y), M3.U32(s.Primary), rounding);
 			trackStart = to + gap;
 		}
 
 		if (max.X - trackStart > 0.5f)
 		{
-			drawList.AddRectFilled(new Vector2(trackStart, min.Y), max, M3.U32(s.SecondaryContainer), rounding);
+			drawList.AddRectFilled(new float2(trackStart, min.Y), max, M3.U32(s.SecondaryContainer), rounding);
 		}
 	}
 
@@ -1359,7 +1356,7 @@ public static partial class M3Widgets
 	{
 		var s = M3.Scheme;
 		var scale = M3.Scale;
-		var size = Vector2.One * diameter;
+		var size = float2.One * diameter;
 
 		ImGui.Dummy(size);
 		var center = ImGui.GetItemRectMin() + (size * 0.5f);
@@ -1396,7 +1393,7 @@ public static partial class M3Widgets
 	}
 
 	// The indeterminate arc of CircularProgress, drawn without taking up a layout slot.
-	public static void Spinner(ImDrawListPtr drawList, Vector2 center, float radius, Vector4 color, float stroke)
+	public static void Spinner(ImDrawListPtr drawList, float2 center, float radius, float4 color, float stroke)
 	{
 		const float Cycle = 1.333f;
 		var time = (float)ImGui.GetTime();
@@ -1418,16 +1415,16 @@ public static partial class M3Widgets
 		return t * t * (3f - (2f * t));
 	}
 
-	private static void RoundCaps(ImDrawListPtr drawList, Vector2 center, float radius, float from, float to, Vector4 color, float thickness)
+	private static void RoundCaps(ImDrawListPtr drawList, float2 center, float radius, float from, float to, float4 color, float thickness)
 	{
 		RoundCap(drawList, center, radius, from, color, thickness);
 		RoundCap(drawList, center, radius, to, color, thickness);
 	}
 
-	private static void RoundCap(ImDrawListPtr drawList, Vector2 center, float radius, float at, Vector4 color, float thickness)
+	private static void RoundCap(ImDrawListPtr drawList, float2 center, float radius, float at, float4 color, float thickness)
 	{
 		var angle = (-MathF.PI * 0.5f) + (MathF.Tau * at);
-		var point = center + (new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * radius);
+		var point = center + (new float2(MathF.Cos(angle), MathF.Sin(angle)) * radius);
 		drawList.AddCircleFilled(point, thickness * 0.5f, M3.U32(color), 12);
 	}
 
@@ -1437,25 +1434,25 @@ public static partial class M3Widgets
 
 	private static ImRaii.ColorDisposable PushInvisibleSliderChrome(bool condition)
 	{
-		return ImRaii.PushColor(ImGuiCol.FrameBg, new Vector4(0f, 0f, 0f, 0f), condition)
-			.Push(ImGuiCol.FrameBgHovered, new Vector4(0f, 0f, 0f, 0f), condition)
-			.Push(ImGuiCol.FrameBgActive, new Vector4(0f, 0f, 0f, 0f), condition)
-			.Push(ImGuiCol.SliderGrab, new Vector4(0f, 0f, 0f, 0f), condition)
-			.Push(ImGuiCol.SliderGrabActive, new Vector4(0f, 0f, 0f, 0f), condition)
-			.Push(ImGuiCol.Text, new Vector4(0f, 0f, 0f, 0f), condition);
+		return ImRaii.PushColor(ImGuiCol.FrameBg, new float4(0f, 0f, 0f, 0f), condition)
+			.Push(ImGuiCol.FrameBgHovered, new float4(0f, 0f, 0f, 0f), condition)
+			.Push(ImGuiCol.FrameBgActive, new float4(0f, 0f, 0f, 0f), condition)
+			.Push(ImGuiCol.SliderGrab, new float4(0f, 0f, 0f, 0f), condition)
+			.Push(ImGuiCol.SliderGrabActive, new float4(0f, 0f, 0f, 0f), condition)
+			.Push(ImGuiCol.Text, new float4(0f, 0f, 0f, 0f), condition);
 	}
 
 	public static bool Slider(string id, ref float value, float min, float max, string displayValue, float width, bool logarithmic = false, bool enabled = true)
 	{
 		var scale = M3.Scale;
 		// Ctrl+click turns the slider into a text box, which must stay visible.
-		var editing = ImGuiP.TempInputIsActive(ImGui.GetID(id));
+		var editing = ImGui.Internal.TempInputIsActive(ImGui.GetID(id));
 		var flags = ImGuiSliderFlags.NoRoundToFormat | (logarithmic ? ImGuiSliderFlags.Logarithmic : ImGuiSliderFlags.None);
 		bool changed;
 
 		using (ImRaii.Disabled(!enabled))
 		using (PushInvisibleSliderChrome(!editing))
-		using (ImRaii.PushStyle(ImGuiStyleVar.FramePadding, new Vector2(editing ? 8f : 0f, 10f) * scale))
+		using (ImRaii.PushStyle(ImGuiStyleVar.FramePadding, new float2(editing ? 8f : 0f, 10f) * scale))
 		{
 			ImGui.SetNextItemWidth(width);
 			changed = ImGui.SliderFloat(id, ref value, min, max, "%.2f", flags);
@@ -1469,13 +1466,13 @@ public static partial class M3Widgets
 	public static bool SliderInt(string id, ref int value, int min, int max, string displayValue, float width, bool logarithmic = false, bool enabled = true)
 	{
 		var scale = M3.Scale;
-		var editing = ImGuiP.TempInputIsActive(ImGui.GetID(id));
+		var editing = ImGui.Internal.TempInputIsActive(ImGui.GetID(id));
 		var flags = logarithmic ? ImGuiSliderFlags.Logarithmic : ImGuiSliderFlags.None;
 		bool changed;
 
 		using (ImRaii.Disabled(!enabled))
 		using (PushInvisibleSliderChrome(!editing))
-		using (ImRaii.PushStyle(ImGuiStyleVar.FramePadding, new Vector2(editing ? 8f : 0f, 10f) * scale))
+		using (ImRaii.PushStyle(ImGuiStyleVar.FramePadding, new float2(editing ? 8f : 0f, 10f) * scale))
 		{
 			ImGui.SetNextItemWidth(width);
 			changed = ImGui.SliderInt(id, ref value, min, max, "%d", flags);
@@ -1550,10 +1547,10 @@ public static partial class M3Widgets
 		var drawList = ImGui.GetWindowDrawList();
 
 		var hasReadout = !string.IsNullOrEmpty(displayValue);
-		var textSize = hasReadout ? ImGui.CalcTextSize(displayValue) : Vector2.Zero;
+		var textSize = hasReadout ? ImGui.CalcTextSize(displayValue) : float2.Zero;
 		if (hasReadout)
 		{
-			drawList.AddText(new Vector2(itemMax.X + (10f * scale), centerY - (textSize.Y * 0.5f)),
+			drawList.AddText(new float2(itemMax.X + (10f * scale), centerY - (textSize.Y * 0.5f)),
 				M3.U32(s.OnSurfaceVariant, enabled ? 1f : M3.DisabledContent), displayValue);
 		}
 
@@ -1576,31 +1573,31 @@ public static partial class M3Widgets
 		var accent = enabled ? s.Primary : M3.Alpha(s.OnSurface, M3.DisabledContent);
 
 		drawList.AddRectFilled(
-			new Vector2(trackLeft, centerY - (trackHeight * 0.5f)),
-			new Vector2(trackRight, centerY + (trackHeight * 0.5f)),
+			new float2(trackLeft, centerY - (trackHeight * 0.5f)),
+			new float2(trackRight, centerY + (trackHeight * 0.5f)),
 			enabled ? M3.U32(s.SurfaceContainerHighest) : M3.U32(s.OnSurface, M3.DisabledContainer), trackHeight);
 
 		if (handleX > trackLeft)
 		{
 			drawList.AddRectFilled(
-				new Vector2(trackLeft, centerY - (trackHeight * 0.5f)),
-				new Vector2(handleX, centerY + (trackHeight * 0.5f)),
+				new float2(trackLeft, centerY - (trackHeight * 0.5f)),
+				new float2(handleX, centerY + (trackHeight * 0.5f)),
 				M3.U32(accent), trackHeight);
 		}
 
 		if (hovered || active)
 		{
-			drawList.AddCircleFilled(new Vector2(handleX, centerY), handleRadius + (8f * scale),
+			drawList.AddCircleFilled(new float2(handleX, centerY), handleRadius + (8f * scale),
 				M3.U32(s.Primary, active ? M3.StatePressed : M3.StateHover), 24);
 		}
 
-		drawList.AddCircleFilled(new Vector2(handleX, centerY), handleRadius, M3.U32(accent), 24);
-		drawList.AddCircleFilled(new Vector2(handleX, centerY), handleRadius * 0.45f, M3.U32(enabled ? s.OnPrimary : s.Surface, 0.9f), 16);
+		drawList.AddCircleFilled(new float2(handleX, centerY), handleRadius, M3.U32(accent), 24);
+		drawList.AddCircleFilled(new float2(handleX, centerY), handleRadius * 0.45f, M3.U32(enabled ? s.OnPrimary : s.Surface, 0.9f), 16);
 
 		if (hasReadout && active)
 		{
-			var padding = new Vector2(8f, 4f) * scale;
-			var bubbleMin = new Vector2(handleX - (textSize.X * 0.5f) - padding.X, itemMin.Y - textSize.Y - (padding.Y * 2f) - (6f * scale));
+			var padding = new float2(8f, 4f) * scale;
+			var bubbleMin = new float2(handleX - (textSize.X * 0.5f) - padding.X, itemMin.Y - textSize.Y - (padding.Y * 2f) - (6f * scale));
 			var bubbleMax = bubbleMin + textSize + (padding * 2f);
 			drawList.AddRectFilled(bubbleMin, bubbleMax, M3.U32(s.InverseSurface), M3.ShapeSmall);
 			drawList.AddText(bubbleMin + padding, M3.U32(s.InverseOnSurface), displayValue);
@@ -1720,7 +1717,7 @@ public static partial class M3Widgets
 		var (display, id) = SplitLabel(label);
 		var trackWidth = 150f * M3.Scale;
 		var readout = FormatValue(format, value);
-		var controlSize = new Vector2(trackWidth + SliderValueGutter(FormatValue(format, max)), ButtonHeight);
+		var controlSize = new float2(trackWidth + SliderValueGutter(FormatValue(format, max)), ButtonHeight);
 
 		var row = M3SettingRow.Begin(display, supporting, controlSize, disabled: !enabled);
 		ImGui.SetCursorScreenPos(row.ControlPosition);
@@ -1733,7 +1730,7 @@ public static partial class M3Widgets
 	{
 		var (display, id) = SplitLabel(label);
 		var trackWidth = 150f * M3.Scale;
-		var controlSize = new Vector2(trackWidth + SliderValueGutter(max.ToString()), ButtonHeight);
+		var controlSize = new float2(trackWidth + SliderValueGutter(max.ToString()), ButtonHeight);
 
 		var row = M3SettingRow.Begin(display, supporting, controlSize, disabled: !enabled);
 		ImGui.SetCursorScreenPos(row.ControlPosition);
@@ -1758,7 +1755,7 @@ public static partial class M3Widgets
 
 		var (display, id) = SplitLabel(label);
 		var width = RowComboWidth(widest);
-		var row = M3SettingRow.Begin(display, supporting, new Vector2(width, ComboHeight), disabled: !enabled);
+		var row = M3SettingRow.Begin(display, supporting, new float2(width, ComboHeight), disabled: !enabled);
 		ImGui.SetCursorScreenPos(row.ControlPosition);
 		var changed = Combo($"##{id}_combo", ref index, items, width, search: search, enabled: enabled);
 		M3SettingRow.End(row);
@@ -1777,7 +1774,7 @@ public static partial class M3Widgets
 
 		var (display, id) = SplitLabel(label);
 		var width = RowComboWidth(widest);
-		var row = M3SettingRow.Begin(display, supporting, new Vector2(width, ComboHeight), disabled: !enabled);
+		var row = M3SettingRow.Begin(display, supporting, new float2(width, ComboHeight), disabled: !enabled);
 		ImGui.SetCursorScreenPos(row.ControlPosition);
 		var changed = Combo($"##{id}_combo", ref value, width, itemLabel, search, enabled);
 		M3SettingRow.End(row);
@@ -1796,30 +1793,30 @@ public static partial class M3Widgets
 
 		var (display, id) = SplitLabel(label);
 		var width = RowComboWidth(widest);
-		var row = M3SettingRow.Begin(display, supporting, new Vector2(width, ComboHeight), disabled: !enabled);
+		var row = M3SettingRow.Begin(display, supporting, new float2(width, ComboHeight), disabled: !enabled);
 		ImGui.SetCursorScreenPos(row.ControlPosition);
 		var changed = Combo($"##{id}_combo", enumType, ref value, width, itemLabel, search, enabled);
 		M3SettingRow.End(row);
 		return changed;
 	}
 
-	public static bool RowColor(string label, ref Vector4 color, Vector4? defaultColor = null, string? supporting = null, bool alpha = true, bool enabled = true)
+	public static bool RowColor(string label, ref float4 color, float4? defaultColor = null, string? supporting = null, bool alpha = true, bool enabled = true)
 	{
 		var (display, id) = SplitLabel(label);
 		var scale = M3.Scale;
 		var swatch = ColorSwatchSize;
 		var canReset = defaultColor is { } fallback && fallback != color;
 		var resetSize = 32f * scale;
-		var controlSize = new Vector2(swatch + (canReset ? M3.Space1 + resetSize : 0f), MathF.Max(swatch, resetSize));
+		var controlSize = new float2(swatch + (canReset ? M3.Space1 + resetSize : 0f), MathF.Max(swatch, resetSize));
 
 		var row = M3SettingRow.Begin(display, supporting, controlSize, disabled: !enabled);
 		var origin = row.ControlPosition;
-		ImGui.SetCursorScreenPos(origin + new Vector2(0f, (controlSize.Y - swatch) * 0.5f));
+		ImGui.SetCursorScreenPos(origin + new float2(0f, (controlSize.Y - swatch) * 0.5f));
 		var changed = ColorSwatch($"##{id}_color", ref color, defaultColor, alpha, enabled);
 
 		if (canReset)
 		{
-			ImGui.SetCursorScreenPos(origin + new Vector2(swatch + M3.Space1, (controlSize.Y - resetSize) * 0.5f));
+			ImGui.SetCursorScreenPos(origin + new float2(swatch + M3.Space1, (controlSize.Y - resetSize) * 0.5f));
 			if (IconButton($"##{id}_reset", FontAwesomeIcon.Undo, "Reset to default", diameter: resetSize, enabled: enabled))
 			{
 				color = defaultColor!.Value;
@@ -1836,7 +1833,7 @@ public static partial class M3Widgets
 		var (display, id) = SplitLabel(label);
 		var width = MathF.Min(240f * M3.Scale, M3SettingRow.MaxControlWidth() * 0.6f);
 
-		var row = M3SettingRow.Begin(display, supporting, new Vector2(width, M3TextField.Height), disabled: !enabled);
+		var row = M3SettingRow.Begin(display, supporting, new float2(width, M3TextField.Height), disabled: !enabled);
 		ImGui.SetCursorScreenPos(row.ControlPosition);
 		bool changed;
 		using (ImRaii.Disabled(!enabled))
@@ -1861,7 +1858,7 @@ public static partial class M3Widgets
 		var origin = ImGui.GetCursorScreenPos();
 		var drawList = ImGui.GetWindowDrawList();
 		var min = origin;
-		var max = origin + new Vector2(width, height);
+		var max = origin + new float2(width, height);
 		var hoveringField = enabled && ImGui.IsMouseHoveringRect(min, max);
 
 		drawList.AddRectFilled(min, max, M3.U32(s.SurfaceContainerHigh, !enabled ? 0.5f : hoveringField ? 1f : 0.92f), height * 0.5f);
@@ -1871,13 +1868,13 @@ public static partial class M3Widgets
 		if (busy)
 		{
 			var stroke = 2f * scale;
-			Spinner(drawList, new Vector2(min.X + iconPadding + (iconWidth * 0.5f), min.Y + (height * 0.5f)),
+			Spinner(drawList, new float2(min.X + iconPadding + (iconWidth * 0.5f), min.Y + (height * 0.5f)),
 				MathF.Max(1f, (iconWidth - stroke) * 0.5f), s.Primary, stroke);
 		}
 		else
 		{
 			M3Draw.Icon(drawList, FontAwesomeIcon.Search,
-				new Vector2(min.X + iconPadding, min.Y + ((height - ImGui.GetTextLineHeight()) * 0.5f)),
+				new float2(min.X + iconPadding, min.Y + ((height - ImGui.GetTextLineHeight()) * 0.5f)),
 				M3.Alpha(s.OnSurfaceVariant, 0.9f));
 		}
 
@@ -1886,19 +1883,19 @@ public static partial class M3Widgets
 		var clearWidth = hasText ? 32f * scale : 0f;
 		var fieldWidth = MathF.Max(24f * scale, max.X - fieldStart - (14f * scale) - clearWidth);
 
-		ImGui.SetCursorScreenPos(new Vector2(fieldStart, min.Y + ((height - ImGui.GetFrameHeight()) * 0.5f)));
+		ImGui.SetCursorScreenPos(new float2(fieldStart, min.Y + ((height - ImGui.GetFrameHeight()) * 0.5f)));
 		ImGui.SetNextItemWidth(fieldWidth);
 
 		bool changed;
 		using (ImRaii.Disabled(!enabled))
 		using (PushClearFrame())
 		{
-			changed = ImGui.InputTextWithHint(id, hint, ref text, maxLength, ImGuiInputTextFlags.AutoSelectAll);
+			changed = M3Input.TextWithHint(id, hint, ref text, maxLength, ImGuiInputTextFlags.AutoSelectAll);
 		}
 
 		if (hasText)
 		{
-			ImGui.SetCursorScreenPos(new Vector2(max.X - clearWidth - (6f * scale), min.Y + ((height - (26f * scale)) * 0.5f)));
+			ImGui.SetCursorScreenPos(new float2(max.X - clearWidth - (6f * scale), min.Y + ((height - (26f * scale)) * 0.5f)));
 			if (IconButton($"{id}_clear", FontAwesomeIcon.Times, "Clear search", diameter: 26f * scale, enabled: enabled))
 			{
 				text = string.Empty;
@@ -1906,8 +1903,8 @@ public static partial class M3Widgets
 			}
 		}
 
-		ImGui.SetCursorScreenPos(new Vector2(min.X, max.Y));
-		ImGui.Dummy(new Vector2(width, 0f));
+		ImGui.SetCursorScreenPos(new float2(min.X, max.Y));
+		ImGui.Dummy(new float2(width, 0f));
 		return changed;
 	}
 
@@ -1930,8 +1927,8 @@ public static partial class M3Widgets
 		}
 
 		var origin = ImGui.GetCursorScreenPos();
-		var min = origin + new Vector2(0f, smallFontSize * 0.5f);
-		var max = min + new Vector2(width, height);
+		var min = origin + new float2(0f, smallFontSize * 0.5f);
+		var max = min + new float2(width, height);
 		var drawList = ImGui.GetWindowDrawList();
 		var hovered = ImGui.IsMouseHoveringRect(min, max);
 
@@ -1939,7 +1936,7 @@ public static partial class M3Widgets
 		if (leadingIcon != FontAwesomeIcon.None)
 		{
 			var iconSize = M3Draw.MeasureIcon(leadingIcon);
-			M3Draw.Icon(drawList, leadingIcon, new Vector2(textLeft, min.Y + ((height - iconSize.Y) * 0.5f)),
+			M3Draw.Icon(drawList, leadingIcon, new float2(textLeft, min.Y + ((height - iconSize.Y) * 0.5f)),
 				error ? s.Error : s.OnSurfaceVariant);
 			textLeft += iconSize.X + (12f * scale);
 		}
@@ -1948,14 +1945,14 @@ public static partial class M3Widgets
 		var textRight = max.X - paddingX - trailingWidth;
 
 		var inputLeft = textLeft - framePadding;
-		ImGui.SetCursorScreenPos(new Vector2(inputLeft, min.Y + ((height - ImGui.GetFrameHeight()) * 0.5f)));
+		ImGui.SetCursorScreenPos(new float2(inputLeft, min.Y + ((height - ImGui.GetFrameHeight()) * 0.5f)));
 		ImGui.SetNextItemWidth(MathF.Max(24f * scale, textRight + framePadding - inputLeft));
 
 		bool changed;
 		using (ImRaii.Disabled(!enabled))
 		using (PushClearFrame())
 		{
-			changed = ImGui.InputText(id, ref text, maxLength, flags);
+			changed = M3Input.Text(id, ref text, maxLength, flags);
 		}
 
 		var focused = ImGui.IsItemActive();
@@ -1975,33 +1972,33 @@ public static partial class M3Widgets
 
 		if (hasLabel)
 		{
-			var restingPosition = new Vector2(textLeft, min.Y + ((height - bodyFontSize) * 0.5f));
-			var floatingPosition = new Vector2(floatingX, min.Y - (smallFontSize * 0.5f));
+			var restingPosition = new float2(textLeft, min.Y + ((height - bodyFontSize) * 0.5f));
+			var floatingPosition = new float2(floatingX, min.Y - (smallFontSize * 0.5f));
 			drawList.AddText(ImGui.GetFont(), float.Lerp(bodyFontSize, smallFontSize, floating),
-				Vector2.Lerp(restingPosition, floatingPosition, floating), M3.U32(labelColor), label);
+				float2.Lerp(restingPosition, floatingPosition, floating), M3.U32(labelColor), label);
 		}
 
 		if (error)
 		{
 			var iconSize = M3Draw.MeasureIcon(FontAwesomeIcon.ExclamationCircle);
 			M3Draw.Icon(drawList, FontAwesomeIcon.ExclamationCircle,
-				new Vector2(max.X - paddingX - iconSize.X, min.Y + ((height - iconSize.Y) * 0.5f)), s.Error);
+				new float2(max.X - paddingX - iconSize.X, min.Y + ((height - iconSize.Y) * 0.5f)), s.Error);
 		}
 
 		var bottom = max.Y;
 		if (!string.IsNullOrEmpty(supporting))
 		{
 			using var font = ImRaii.PushFont(M3.LabelSmall);
-			bottom = M3Draw.WrappedText(supporting, new Vector2(min.X + paddingX, max.Y + (4f * scale)),
+			bottom = M3Draw.WrappedText(supporting, new float2(min.X + paddingX, max.Y + (4f * scale)),
 				MathF.Max(32f * scale, width - (paddingX * 2f)), error ? s.Error : M3.Alpha(s.OnSurfaceVariant, 0.9f));
 		}
 
-		ImGui.SetCursorScreenPos(new Vector2(origin.X, bottom));
-		ImGui.Dummy(new Vector2(width, 0f));
+		ImGui.SetCursorScreenPos(new float2(origin.X, bottom));
+		ImGui.Dummy(new float2(width, 0f));
 		return changed;
 	}
 
-	private static void OutlineWithNotch(ImDrawListPtr drawList, Vector2 min, Vector2 max, float rounding, float notchStart, float notchEnd, uint color, float thickness)
+	private static void OutlineWithNotch(ImDrawListPtr drawList, float2 min, float2 max, float rounding, float notchStart, float notchEnd, uint color, float thickness)
 	{
 		if (notchEnd - notchStart < 1f)
 		{
@@ -2010,12 +2007,12 @@ public static partial class M3Widgets
 		}
 
 		// PathArcToFast angles are in twelfths of a turn: 0 right, 3 down, 6 left, 9 up.
-		drawList.PathLineTo(new Vector2(notchEnd, min.Y));
-		drawList.PathArcToFast(new Vector2(max.X - rounding, min.Y + rounding), rounding, 9, 12);
-		drawList.PathArcToFast(new Vector2(max.X - rounding, max.Y - rounding), rounding, 0, 3);
-		drawList.PathArcToFast(new Vector2(min.X + rounding, max.Y - rounding), rounding, 3, 6);
-		drawList.PathArcToFast(new Vector2(min.X + rounding, min.Y + rounding), rounding, 6, 9);
-		drawList.PathLineTo(new Vector2(notchStart, min.Y));
+		drawList.PathLineTo(new float2(notchEnd, min.Y));
+		drawList.PathArcToFast(new float2(max.X - rounding, min.Y + rounding), rounding, 9, 12);
+		drawList.PathArcToFast(new float2(max.X - rounding, max.Y - rounding), rounding, 0, 3);
+		drawList.PathArcToFast(new float2(min.X + rounding, max.Y - rounding), rounding, 3, 6);
+		drawList.PathArcToFast(new float2(min.X + rounding, min.Y + rounding), rounding, 6, 9);
+		drawList.PathLineTo(new float2(notchStart, min.Y));
 		drawList.PathStroke(color, ImDrawFlags.None, thickness);
 	}
 
@@ -2027,14 +2024,14 @@ public static partial class M3Widgets
 	{
 		var scale = M3.Scale;
 		var pad = verticalPadding * scale;
-		ImGui.Dummy(new Vector2(0f, pad));
+		ImGui.Dummy(new float2(0f, pad));
 		var width = MathF.Max(1f, ImGui.GetContentRegionAvail().X);
 		var origin = ImGui.GetCursorScreenPos();
-		ImGui.GetWindowDrawList().AddLine(origin, origin + new Vector2(width, 0f), M3.U32(M3.Scheme.OutlineVariant, 0.7f), 1f * scale);
-		ImGui.Dummy(new Vector2(width, pad));
+		ImGui.GetWindowDrawList().AddLine(origin, origin + new float2(width, 0f), M3.U32(M3.Scheme.OutlineVariant, 0.7f), 1f * scale);
+		ImGui.Dummy(new float2(width, pad));
 	}
 
-	public static void SectionLabel(string text, Vector4? accent = null)
+	public static void SectionLabel(string text, float4? accent = null)
 	{
 		var s = M3.Scheme;
 		var scale = M3.Scale;
@@ -2046,19 +2043,19 @@ public static partial class M3Widgets
 		var width = MathF.Max(1f, ImGui.GetContentRegionAvail().X);
 		var height = textSize.Y + (14f * scale);
 
-		ImGui.Dummy(new Vector2(width, height));
+		ImGui.Dummy(new float2(width, height));
 		var min = ImGui.GetItemRectMin();
 		var max = ImGui.GetItemRectMax();
 		var drawList = ImGui.GetWindowDrawList();
 		var textY = min.Y + (10f * scale);
 		var lineY = textY + (textSize.Y * 0.5f);
 
-		drawList.AddText(new Vector2(min.X, textY), M3.U32(tone, 0.95f), label);
+		drawList.AddText(new float2(min.X, textY), M3.U32(tone, 0.95f), label);
 
 		var lineStart = min.X + textSize.X + (10f * scale);
 		if (max.X > lineStart)
 		{
-			drawList.AddLine(new Vector2(lineStart, lineY), new Vector2(max.X, lineY), M3.U32(s.OutlineVariant, 0.55f), 1f * scale);
+			drawList.AddLine(new float2(lineStart, lineY), new float2(max.X, lineY), M3.U32(s.OutlineVariant, 0.55f), 1f * scale);
 		}
 	}
 
@@ -2068,9 +2065,9 @@ public static partial class M3Widgets
 	}
 
 	// A small icon that explains something on hover. It's as tall as a frame, to line up with controls and frame-aligned text.
-	public static void HelpMarker(string text, FontAwesomeIcon icon = FontAwesomeIcon.InfoCircle, Vector4? color = null)
+	public static void HelpMarker(string text, FontAwesomeIcon icon = FontAwesomeIcon.InfoCircle, float4? color = null)
 	{
-		var size = new Vector2(HelpMarkerWidth(icon), ImGui.GetFrameHeight());
+		var size = new float2(HelpMarkerWidth(icon), ImGui.GetFrameHeight());
 		ImGui.Dummy(size);
 		var min = ImGui.GetItemRectMin();
 		var hovered = ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled);
@@ -2094,7 +2091,7 @@ public static partial class M3Widgets
 		var scale = M3.Scale;
 		var accent = M3.Severity(severity);
 		var container = M3.SeverityContainer(severity);
-		var padding = new Vector2(16f, 12f) * scale;
+		var padding = new float2(16f, 12f) * scale;
 		var width = MathF.Max(64f * scale, ImGui.GetContentRegionAvail().X);
 
 		var iconWidth = M3Draw.MeasureIcon(icon).X + (12f * scale);
@@ -2105,7 +2102,7 @@ public static partial class M3Widgets
 
 		var origin = ImGui.GetCursorScreenPos();
 		var min = origin;
-		var max = origin + new Vector2(width, height);
+		var max = origin + new float2(width, height);
 		var drawList = ImGui.GetWindowDrawList();
 		hovered = ImGui.IsMouseHoveringRect(min, max, false) && ImGui.IsWindowHovered(ImGuiHoveredFlags.ChildWindows);
 
@@ -2113,18 +2110,18 @@ public static partial class M3Widgets
 		M3Draw.AccentRail(drawList, min.X + (2f * scale), 3f * scale, min.Y + (6f * scale), max.Y - (6f * scale), M3.Alpha(accent, 0.9f),
 			M3Draw.ResolveFade(40f, 0.35f, height));
 
-		M3Draw.Icon(drawList, icon, new Vector2(min.X + padding.X, min.Y + padding.Y + ((ImGui.GetTextLineHeight() * 0.1f))), accent);
-		_ = M3Draw.WrappedText(message, new Vector2(min.X + padding.X + iconWidth, min.Y + padding.Y), textWidth, M3.Alpha(s.OnSurface, 0.94f));
+		M3Draw.Icon(drawList, icon, new float2(min.X + padding.X, min.Y + padding.Y + ((ImGui.GetTextLineHeight() * 0.1f))), accent);
+		_ = M3Draw.WrappedText(message, new float2(min.X + padding.X + iconWidth, min.Y + padding.Y), textWidth, M3.Alpha(s.OnSurface, 0.94f));
 
 		var clicked = false;
 		if (!string.IsNullOrEmpty(actionLabel))
 		{
-			ImGui.SetCursorScreenPos(new Vector2(max.X - padding.X - actionWidth + (12f * scale), min.Y + ((height - ButtonHeight) * 0.5f)));
+			ImGui.SetCursorScreenPos(new float2(max.X - padding.X - actionWidth + (12f * scale), min.Y + ((height - ButtonHeight) * 0.5f)));
 			clicked = Button($"{id}_action", actionLabel, M3ButtonStyle.Text);
 		}
 
-		ImGui.SetCursorScreenPos(new Vector2(min.X, max.Y));
-		ImGui.Dummy(new Vector2(width, 0f));
+		ImGui.SetCursorScreenPos(new float2(min.X, max.Y));
+		ImGui.Dummy(new float2(width, 0f));
 
 		if (hovered)
 		{
@@ -2146,8 +2143,8 @@ public static partial class M3Widgets
 		var y = origin.Y + (16f * scale);
 
 		var diameter = 56f * scale;
-		var circleMin = new Vector2(centerX - (diameter * 0.5f), y);
-		var circleMax = circleMin + new Vector2(diameter, diameter);
+		var circleMin = new float2(centerX - (diameter * 0.5f), y);
+		var circleMax = circleMin + new float2(diameter, diameter);
 		drawList.AddCircleFilled((circleMin + circleMax) * 0.5f, diameter * 0.5f, M3.U32(s.SecondaryContainer, 0.8f), 48);
 		M3Draw.IconCentered(drawList, icon, circleMin, circleMax, s.OnSecondaryContainer);
 		y = circleMax.Y + (12f * scale);
@@ -2166,20 +2163,20 @@ public static partial class M3Widgets
 		if (!string.IsNullOrEmpty(actionLabel))
 		{
 			var buttonWidth = ButtonWidth(FontAwesomeIcon.None, actionLabel);
-			ImGui.SetCursorScreenPos(new Vector2(centerX - (buttonWidth * 0.5f), y + (12f * scale)));
+			ImGui.SetCursorScreenPos(new float2(centerX - (buttonWidth * 0.5f), y + (12f * scale)));
 			clicked = Button($"{id}_action", actionLabel, M3ButtonStyle.Tonal);
 			y = ImGui.GetItemRectMax().Y;
 		}
 
-		ImGui.SetCursorScreenPos(new Vector2(origin.X, y + (16f * scale)));
-		ImGui.Dummy(new Vector2(width, 0f));
+		ImGui.SetCursorScreenPos(new float2(origin.X, y + (16f * scale)));
+		ImGui.Dummy(new float2(width, 0f));
 		return clicked;
 	}
 
-	private static float CenteredBlock(string text, float centerX, float top, float maxWidth, Vector4 color)
+	private static float CenteredBlock(string text, float centerX, float top, float maxWidth, float4 color)
 	{
 		var blockWidth = ImGui.CalcTextSize(text, false, maxWidth).X;
-		return M3Draw.WrappedText(text, new Vector2(centerX - (blockWidth * 0.5f), top), maxWidth, color);
+		return M3Draw.WrappedText(text, new float2(centerX - (blockWidth * 0.5f), top), maxWidth, color);
 	}
 
 	#endregion
@@ -2240,7 +2237,7 @@ public static partial class M3Widgets
 		}
 
 		popupWidth = MathF.Min(popupWidth, 560f * scale);
-		ImGui.SetNextWindowSizeConstraints(new Vector2(popupWidth, 0f), new Vector2(popupWidth, 460f * scale));
+		ImGui.SetNextWindowSizeConstraints(new float2(popupWidth, 0f), new float2(popupWidth, 460f * scale));
 		using var menu = M3Menu.Begin(popupId);
 		if (!menu.IsOpen)
 		{
@@ -2260,11 +2257,11 @@ public static partial class M3Widgets
 			}
 
 			// Enter ends typing within the field's own call, so check whether it's being typed in before drawing it.
-			var typing = ImGuiP.GetActiveID() == ImGui.GetID("##search");
+			var typing = ImGui.Internal.GetActiveID() == ImGui.GetID("##search");
 			_ = SearchField("##search", "Search", ref query, ImGui.GetContentRegionAvail().X);
 			pickFirst = typing && (ImGui.IsKeyPressed(ImGuiKey.Enter) || ImGui.IsKeyPressed(ImGuiKey.KeypadEnter));
 			_comboQueries[key] = query;
-			ImGui.Dummy(new Vector2(0f, M3.Space1));
+			ImGui.Dummy(new float2(0f, M3.Space1));
 		}
 
 		_comboMatches.Clear();
@@ -2306,7 +2303,7 @@ public static partial class M3Widgets
 
 		var rowHeight = MenuItemHeight;
 		var listHeight = MathF.Min(_comboMatches.Count * rowHeight, 360f * scale);
-		using var list = ImRaii.Child("##items", new Vector2(0f, listHeight), false);
+		using var list = ImRaii.Child("##items", new float2(0f, listHeight), false);
 		if (!list)
 		{
 			return false;
@@ -2321,7 +2318,7 @@ public static partial class M3Widgets
 			}
 		}
 
-		var clipper = ImGui.ImGuiListClipper();
+		var clipper = new ImGuiListClipper();
 		clipper.Begin(_comboMatches.Count, rowHeight);
 		while (clipper.Step())
 		{
@@ -2338,7 +2335,6 @@ public static partial class M3Widgets
 		}
 
 		clipper.End();
-		clipper.Destroy();
 		return changed;
 	}
 
@@ -2382,7 +2378,7 @@ public static partial class M3Widgets
 		var scale = M3.Scale;
 		var height = ComboHeight;
 
-		var clicked = ImGui.InvisibleButton(id, new Vector2(width, height)) && enabled;
+		var clicked = ImGui.InvisibleButton(id, new float2(width, height)) && enabled;
 		var mouseOver = ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenBlockedByActiveItem);
 		var hovered = enabled && mouseOver;
 		var held = enabled && ImGui.IsItemActive();
@@ -2405,13 +2401,13 @@ public static partial class M3Widgets
 		var textWidth = MathF.Max(8f * scale, width - (ComboTextInset * 2f) - ComboChevronWidth);
 		var display = M3Navigation.Truncate(label, textWidth);
 		var textSize = ImGui.CalcTextSize(display);
-		drawList.AddText(new Vector2(min.X + ComboTextInset, min.Y + ((height - textSize.Y) * 0.5f)), M3.U32(s.OnSurface, 0.95f * dim), display);
+		drawList.AddText(new float2(min.X + ComboTextInset, min.Y + ((height - textSize.Y) * 0.5f)), M3.U32(s.OnSurface, 0.95f * dim), display);
 
-		var chevronCenter = new Vector2(max.X - (16f * scale), min.Y + (height * 0.5f));
+		var chevronCenter = new float2(max.X - (16f * scale), min.Y + (height * 0.5f));
 		var arm = 4.5f * scale;
 		var chevronColor = M3.U32(s.OnSurfaceVariant, (hovered || open ? 1f : 0.8f) * dim);
-		drawList.AddLine(chevronCenter + new Vector2(-arm, -arm * 0.5f), chevronCenter + new Vector2(0f, arm * 0.6f), chevronColor, 2f * scale);
-		drawList.AddLine(chevronCenter + new Vector2(0f, arm * 0.6f), chevronCenter + new Vector2(arm, -arm * 0.5f), chevronColor, 2f * scale);
+		drawList.AddLine(chevronCenter + new float2(-arm, -arm * 0.5f), chevronCenter + new float2(0f, arm * 0.6f), chevronColor, 2f * scale);
+		drawList.AddLine(chevronCenter + new float2(0f, arm * 0.6f), chevronCenter + new float2(arm, -arm * 0.5f), chevronColor, 2f * scale);
 		M3Draw.FocusRing(min, max, rounding);
 
 		if (hovered)
@@ -2493,13 +2489,13 @@ public static partial class M3Widgets
 
 	public static float MenuItemHeight => M3.FitText(34f, 7f);
 
-	public static bool MenuItem(string id, string label, bool selected, FontAwesomeIcon icon = FontAwesomeIcon.None, bool enabled = true, string? shortcut = null, string? tooltip = null, IDalamudTextureWrap? texture = null)
+	public static bool MenuItem(string id, string label, bool selected, FontAwesomeIcon icon = FontAwesomeIcon.None, bool enabled = true, string? shortcut = null, string? tooltip = null, IM3Texture? texture = null)
 	{
 		return MenuItemCore(id, label, selected, icon, enabled, shortcut, tooltip, texture, false);
 	}
 
 	// Fit keeps the row inside the menu and shortens a long label, for menus of a fixed width.
-	internal static bool MenuItemCore(string id, string label, bool selected, FontAwesomeIcon icon, bool enabled, string? shortcut, string? tooltip, IDalamudTextureWrap? texture, bool fit,
+	internal static bool MenuItemCore(string id, string label, bool selected, FontAwesomeIcon icon, bool enabled, string? shortcut, string? tooltip, IM3Texture? texture, bool fit,
 		bool submenu = false, bool open = false)
 	{
 		var s = M3.Scheme;
@@ -2512,7 +2508,7 @@ public static partial class M3Widgets
 		var needed = leadWidth + (8f * scale) + ImGui.CalcTextSize(label).X + shortcutWidth + (16f * scale);
 		var width = fit ? MathF.Max(1f, available) : MathF.Max(available, needed);
 
-		var pressed = ImGui.InvisibleButton(id, new Vector2(width, height)) && enabled;
+		var pressed = ImGui.InvisibleButton(id, new float2(width, height)) && enabled;
 		var mouseOver = ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenBlockedByActiveItem);
 		var hovered = enabled && mouseOver;
 		var held = enabled && ImGui.IsItemActive();
@@ -2550,20 +2546,20 @@ public static partial class M3Widgets
 		var room = max.X - textX - shortcutWidth - (8f * scale);
 		var display = fit ? M3Navigation.Truncate(label, room) : label;
 		var textSize = ImGui.CalcTextSize(display);
-		drawList.AddText(new Vector2(textX, min.Y + ((height - textSize.Y) * 0.5f)),
+		drawList.AddText(new float2(textX, min.Y + ((height - textSize.Y) * 0.5f)),
 			M3.U32(selected ? s.OnSecondaryContainer : s.OnSurface, 0.95f * dim), display);
 
 		if (submenu)
 		{
 			var chevronSize = M3Draw.MeasureIcon(FontAwesomeIcon.ChevronRight);
 			M3Draw.IconCentered(drawList, FontAwesomeIcon.ChevronRight,
-				new Vector2(max.X - (12f * scale) - chevronSize.X, min.Y), new Vector2(max.X - (12f * scale), max.Y),
+				new float2(max.X - (12f * scale) - chevronSize.X, min.Y), new float2(max.X - (12f * scale), max.Y),
 				M3.Alpha(s.OnSurfaceVariant, dim), 0.8f);
 		}
 		else if (!string.IsNullOrEmpty(shortcut))
 		{
 			var shortcutSize = ImGui.CalcTextSize(shortcut);
-			drawList.AddText(new Vector2(max.X - (12f * scale) - shortcutSize.X, min.Y + ((height - shortcutSize.Y) * 0.5f)),
+			drawList.AddText(new float2(max.X - (12f * scale) - shortcutSize.X, min.Y + ((height - shortcutSize.Y) * 0.5f)),
 				M3.U32(s.OnSurfaceVariant, 0.85f * dim), shortcut);
 		}
 
@@ -2584,18 +2580,18 @@ public static partial class M3Widgets
 	public static float ColorSwatchSize => 28f * M3.Scale;
 
 	// With a default colour, the picker gets a reset button. Alpha false hides the alpha bar and keeps the colour opaque.
-	public static bool ColorSwatch(string id, ref Vector4 color, Vector4? defaultColor = null, bool alpha = true, bool enabled = true, string? tooltip = null)
+	public static bool ColorSwatch(string id, ref float4 color, float4? defaultColor = null, bool alpha = true, bool enabled = true, string? tooltip = null)
 	{
 		var s = M3.Scheme;
 		var scale = M3.Scale;
 		var diameter = ColorSwatchSize;
 		var radius = diameter * 0.5f;
 
-		var clicked = ImGui.InvisibleButton(id, Vector2.One * diameter) && enabled;
+		var clicked = ImGui.InvisibleButton(id, float2.One * diameter) && enabled;
 		var mouseOver = ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenBlockedByActiveItem);
 		var hovered = enabled && mouseOver;
 		var min = ImGui.GetItemRectMin();
-		var center = min + (Vector2.One * radius);
+		var center = min + (float2.One * radius);
 		var drawList = ImGui.GetWindowDrawList();
 		var dim = enabled ? 1f : M3.DisabledContent;
 
@@ -2609,7 +2605,7 @@ public static partial class M3Widgets
 		var shown = alpha ? color : color with { W = 1f };
 		drawList.AddCircleFilled(center, radius, M3.U32(shown with { W = shown.W * dim }), 32);
 		drawList.AddCircle(center, radius, M3.U32(s.Outline, (hovered ? 1f : 0.6f) * dim), 32, 1.5f * scale);
-		M3Draw.FocusRing(min, min + (Vector2.One * diameter), radius);
+		M3Draw.FocusRing(min, min + (float2.One * diameter), radius);
 
 		if (hovered)
 		{
@@ -2639,7 +2635,7 @@ public static partial class M3Widgets
 
 		var hex = HexOf(color, alpha);
 		ImGui.SetNextItemWidth(120f * scale);
-		if (ImGui.InputText($"##{popupId}_hex", ref hex, 10) && TryParseHex(hex, out var parsed))
+		if (M3Input.Text($"##{popupId}_hex", ref hex, 10) && TryParseHex(hex, out var parsed))
 		{
 			color = alpha ? parsed : parsed with { W = color.W };
 			changed = true;
@@ -2658,7 +2654,7 @@ public static partial class M3Widgets
 		return changed;
 	}
 
-	private static string HexOf(Vector4 color, bool alpha)
+	private static string HexOf(float4 color, bool alpha)
 	{
 		static int Channel(float value)
 		{
@@ -2669,7 +2665,7 @@ public static partial class M3Widgets
 		return alpha ? $"{rgb}{Channel(color.W):X2}" : rgb;
 	}
 
-	private static bool TryParseHex(string text, out Vector4 color)
+	private static bool TryParseHex(string text, out float4 color)
 	{
 		color = default;
 		var digits = text.Trim().TrimStart('#');
@@ -2683,7 +2679,7 @@ public static partial class M3Widgets
 			value = (value << 8) | 0xFF;
 		}
 
-		color = new Vector4(((value >> 24) & 0xFF) / 255f, ((value >> 16) & 0xFF) / 255f, ((value >> 8) & 0xFF) / 255f, (value & 0xFF) / 255f);
+		color = new float4(((value >> 24) & 0xFF) / 255f, ((value >> 16) & 0xFF) / 255f, ((value >> 8) & 0xFF) / 255f, (value & 0xFF) / 255f);
 		return true;
 	}
 
@@ -2695,8 +2691,6 @@ public static partial class M3Widgets
 		_holdProgress.Clear();
 		_enumLabels.Clear();
 		_enumValues.Clear();
-		ResetHotkeys();
-		ResetReorder();
 	}
 
 	#endregion

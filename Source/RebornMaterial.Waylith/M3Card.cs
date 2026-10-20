@@ -1,5 +1,3 @@
-using Dalamud.Interface.Utility.Raii;
-
 namespace RebornMaterial;
 
 // Cards paint their background using last frame's height. Splitting the draw list instead breaks inside tables, which split it too.
@@ -50,7 +48,7 @@ public static class M3Card
 	// The space left under a card, before whatever comes next.
 	public static float Margin => M3Style.Spacing(8f, 4f);
 
-	public static Scope Begin(string id, string? title = null, FontAwesomeIcon icon = FontAwesomeIcon.None, Vector4? accent = null, M3CardStyle style = M3CardStyle.Filled, string? subtitle = null)
+	public static Scope Begin(string id, string? title = null, FontAwesomeIcon icon = FontAwesomeIcon.None, float4? accent = null, M3CardStyle style = M3CardStyle.Filled, string? subtitle = null)
 	{
 		var scale = M3.Scale;
 		var tone = accent ?? M3.Scheme.Primary;
@@ -62,7 +60,7 @@ public static class M3Card
 		var previous = M3CardHost.PreviousHeight(id);
 		if (previous > 0f)
 		{
-			var max = new Vector2(min.X + width, min.Y + previous);
+			var max = new float2(min.X + width, min.Y + previous);
 			Paint(ImGui.GetWindowDrawList(), min, max, tone, style, ImGui.IsMouseHoveringRect(min, max, false));
 		}
 
@@ -73,7 +71,7 @@ public static class M3Card
 
 			if (icon != FontAwesomeIcon.None)
 			{
-				M3Draw.Icon(drawList, icon, new Vector2(textX, cursorY + (1f * scale)), tone);
+				M3Draw.Icon(drawList, icon, new float2(textX, cursorY + (1f * scale)), tone);
 				textX += M3Draw.MeasureIcon(icon).X + (10f * scale);
 			}
 
@@ -81,7 +79,7 @@ public static class M3Card
 			using (ImRaii.PushFont(M3.TitleMedium))
 			{
 				var titleSize = ImGui.CalcTextSize(title);
-				drawList.AddText(new Vector2(textX, cursorY), M3.U32(M3.Scheme.OnSurface, 0.98f), title);
+				drawList.AddText(new float2(textX, cursorY), M3.U32(M3.Scheme.OnSurface, 0.98f), title);
 				titleHeight = titleSize.Y;
 			}
 
@@ -90,7 +88,7 @@ public static class M3Card
 			if (!string.IsNullOrEmpty(subtitle))
 			{
 				cursorY = M3Draw.WrappedText(subtitle,
-					new Vector2(min.X + ContentInset, cursorY),
+					new float2(min.X + ContentInset, cursorY),
 					MathF.Max(32f * scale, width - ContentInset - RightInset),
 					M3.Alpha(M3.Scheme.OnSurfaceVariant, 0.92f)) + (4f * scale);
 			}
@@ -101,7 +99,7 @@ public static class M3Card
 		// Use Indent, not the cursor, so wrapped lines keep the inset.
 		ImGui.Indent(ContentInset);
 		PushContentWrap(min.X + width);
-		ImGui.SetCursorScreenPos(new Vector2(min.X + ContentInset, cursorY));
+		ImGui.SetCursorScreenPos(new float2(min.X + ContentInset, cursorY));
 		return new Scope(id, min, width, ContentInset);
 	}
 
@@ -111,7 +109,7 @@ public static class M3Card
 		ImGui.PushTextWrapPos(localX);
 	}
 
-	public static void Paint(ImDrawListPtr drawList, Vector2 min, Vector2 max, Vector4 accent, M3CardStyle style, bool hovered)
+	public static void Paint(ImDrawListPtr drawList, float2 min, float2 max, float4 accent, M3CardStyle style, bool hovered)
 	{
 		var s = M3.Scheme;
 		var scale = M3.Scale;
@@ -144,7 +142,7 @@ public static class M3Card
 			M3Draw.ResolveFade(80f, 0.35f, railBottom - railTop));
 	}
 
-	public readonly struct Scope(string id, Vector2 min, float width, float indent) : IDisposable
+	public readonly struct Scope(string id, float2 min, float width, float indent) : IDisposable
 	{
 		public void Dispose()
 		{
@@ -157,15 +155,15 @@ public static class M3Card
 			var bottom = MathF.Max(contentBottom + BottomPadding, min.Y + (40f * scale));
 			M3CardHost.RecordHeight(id, bottom - min.Y);
 
-			ImGui.SetCursorScreenPos(new Vector2(min.X, bottom + Margin));
-			ImGui.Dummy(new Vector2(width, 0f));
+			ImGui.SetCursorScreenPos(new float2(min.X, bottom + Margin));
+			ImGui.Dummy(new float2(width, 0f));
 		}
 	}
 }
 
 public static class M3ExpandableCard
 {
-	public static Scope Begin(string id, string title, ref bool expanded, FontAwesomeIcon icon = FontAwesomeIcon.None, Vector4? accent = null, string? badge = null, Vector4? badgeAccent = null, string? trailing = null)
+	public static Scope Begin(string id, string title, ref bool expanded, FontAwesomeIcon icon = FontAwesomeIcon.None, float4? accent = null, string? badge = null, float4? badgeAccent = null, string? trailing = null)
 	{
 		var s = M3.Scheme;
 		var scale = M3.Scale;
@@ -176,9 +174,9 @@ public static class M3ExpandableCard
 		var headerHeight = M3Style.Density == M3Density.Tight ? M3.FitText(36f, 8f) : M3.FitText(48f, 12f);
 
 		var previousHeight = MathF.Max(M3CardHost.PreviousHeight(id), headerHeight);
-		Paint(ImGui.GetWindowDrawList(), min, new Vector2(min.X + width, min.Y + previousHeight), tone, expanded);
+		Paint(ImGui.GetWindowDrawList(), min, new float2(min.X + width, min.Y + previousHeight), tone, expanded);
 
-		if (ImGui.InvisibleButton($"{id}_header", new Vector2(width, headerHeight)))
+		if (ImGui.InvisibleButton($"{id}_header", new float2(width, headerHeight)))
 		{
 			expanded = !expanded;
 		}
@@ -195,7 +193,7 @@ public static class M3ExpandableCard
 
 		if (hovered || held)
 		{
-			drawList.AddRectFilled(min, new Vector2(min.X + width, min.Y + headerHeight),
+			drawList.AddRectFilled(min, new float2(min.X + width, min.Y + headerHeight),
 				M3.U32(s.OnSurface, held ? M3.StatePressed : M3.StateHover), M3.ShapeMedium);
 		}
 
@@ -203,15 +201,15 @@ public static class M3ExpandableCard
 		if (icon != FontAwesomeIcon.None)
 		{
 			var iconSize = M3Draw.MeasureIcon(icon);
-			M3Draw.Icon(drawList, icon, new Vector2(textX, min.Y + ((headerHeight - iconSize.Y) * 0.5f)), tone);
+			M3Draw.Icon(drawList, icon, new float2(textX, min.Y + ((headerHeight - iconSize.Y) * 0.5f)), tone);
 			textX += iconSize.X + (12f * scale);
 		}
 
-		var chevronCenter = new Vector2(min.X + width - M3Card.RightInset - (8f * scale), min.Y + (headerHeight * 0.5f));
+		var chevronCenter = new float2(min.X + width - M3Card.RightInset - (8f * scale), min.Y + (headerHeight * 0.5f));
 
 		var contentRight = chevronCenter.X - (20f * scale);
-		var badgePadding = new Vector2(8f, 3f) * scale;
-		var badgeSize = Vector2.Zero;
+		var badgePadding = new float2(8f, 3f) * scale;
+		var badgeSize = float2.Zero;
 		if (!string.IsNullOrEmpty(badge))
 		{
 			using var badgeFont = ImRaii.PushFont(M3.LabelSmall);
@@ -219,7 +217,7 @@ public static class M3ExpandableCard
 		}
 
 		var badgeRoom = badgeSize.X > 0f ? badgeSize.X + (10f * scale) : 0f;
-		var trailingSize = string.IsNullOrEmpty(trailing) ? Vector2.Zero : ImGui.CalcTextSize(trailing);
+		var trailingSize = string.IsNullOrEmpty(trailing) ? float2.Zero : ImGui.CalcTextSize(trailing);
 		var trailingRoom = trailingSize.X > 0f ? trailingSize.X + (16f * scale) : 0f;
 
 		using (ImRaii.PushFont(M3.TitleMedium))
@@ -232,7 +230,7 @@ public static class M3ExpandableCard
 
 			var label = M3Navigation.Truncate(title, MathF.Max(24f * scale, titleRoom - trailingRoom));
 			var titleSize = ImGui.CalcTextSize(label);
-			drawList.AddText(new Vector2(textX, min.Y + ((headerHeight - titleSize.Y) * 0.5f)),
+			drawList.AddText(new float2(textX, min.Y + ((headerHeight - titleSize.Y) * 0.5f)),
 				M3.U32(expanded ? s.OnSurface : M3.Alpha(s.OnSurface, 0.88f)), label);
 			textX += titleSize.X + (10f * scale);
 		}
@@ -241,19 +239,19 @@ public static class M3ExpandableCard
 		{
 			var badgeTone = badgeAccent ?? tone;
 			using var badgeFont = ImRaii.PushFont(M3.LabelSmall);
-			var badgeMin = new Vector2(textX, min.Y + ((headerHeight - badgeSize.Y) * 0.5f));
+			var badgeMin = new float2(textX, min.Y + ((headerHeight - badgeSize.Y) * 0.5f));
 			drawList.AddRectFilled(badgeMin, badgeMin + badgeSize, M3.U32(badgeTone, 0.18f), M3.ShapeFull);
 			drawList.AddText(badgeMin + badgePadding, M3.U32(badgeTone, 0.95f), badge);
 		}
 
 		if (trailingRoom > 0f && trailing is not null)
 		{
-			drawList.AddText(new Vector2(contentRight - trailingSize.X, min.Y + ((headerHeight - trailingSize.Y) * 0.5f)),
+			drawList.AddText(new float2(contentRight - trailingSize.X, min.Y + ((headerHeight - trailingSize.Y) * 0.5f)),
 				M3.U32(s.OnSurfaceVariant, 0.85f), trailing);
 		}
 
 		DrawChevron(drawList, chevronCenter, progress, M3.Alpha(s.OnSurfaceVariant, hovered ? 1f : 0.8f));
-		M3Draw.FocusRing(min, new Vector2(min.X + width, min.Y + headerHeight), M3.ShapeMedium);
+		M3Draw.FocusRing(min, new float2(min.X + width, min.Y + headerHeight), M3.ShapeMedium);
 
 		// Follow the open state, not the animation, or the divider gets left under a closed section.
 		var indent = 0f;
@@ -264,22 +262,22 @@ public static class M3ExpandableCard
 			M3Card.PushContentWrap(min.X + width);
 
 			drawList.AddLine(
-				new Vector2(min.X + indent, min.Y + headerHeight),
-				new Vector2(min.X + width - M3Card.RightInset, min.Y + headerHeight),
+				new float2(min.X + indent, min.Y + headerHeight),
+				new float2(min.X + width - M3Card.RightInset, min.Y + headerHeight),
 				M3.U32(s.OutlineVariant, 0.5f), 1f * scale);
 
-			ImGui.SetCursorScreenPos(new Vector2(min.X + indent, min.Y + headerHeight));
-			ImGui.Dummy(new Vector2(0f, M3Card.Gap));
+			ImGui.SetCursorScreenPos(new float2(min.X + indent, min.Y + headerHeight));
+			ImGui.Dummy(new float2(0f, M3Card.Gap));
 		}
 		else
 		{
-			ImGui.SetCursorScreenPos(new Vector2(min.X, min.Y + headerHeight - M3Card.BottomPadding));
+			ImGui.SetCursorScreenPos(new float2(min.X, min.Y + headerHeight - M3Card.BottomPadding));
 		}
 
 		return new Scope(id, min, width, indent, expanded);
 	}
 
-	private static void DrawChevron(ImDrawListPtr drawList, Vector2 center, float progress, Vector4 color)
+	private static void DrawChevron(ImDrawListPtr drawList, float2 center, float progress, float4 color)
 	{
 		var scale = M3.Scale;
 		var arm = 5f * scale;
@@ -287,20 +285,20 @@ public static class M3ExpandableCard
 		var cos = MathF.Cos(angle);
 		var sin = MathF.Sin(angle);
 
-		Vector2 Rotate(Vector2 point)
+		float2 Rotate(float2 point)
 		{
-			return center + new Vector2((point.X * cos) - (point.Y * sin), (point.X * sin) + (point.Y * cos));
+			return center + new float2((point.X * cos) - (point.Y * sin), (point.X * sin) + (point.Y * cos));
 		}
 
-		var left = Rotate(new Vector2(-arm, -arm * 0.6f));
-		var tip = Rotate(new Vector2(0f, arm * 0.6f));
-		var right = Rotate(new Vector2(arm, -arm * 0.6f));
+		var left = Rotate(new float2(-arm, -arm * 0.6f));
+		var tip = Rotate(new float2(0f, arm * 0.6f));
+		var right = Rotate(new float2(arm, -arm * 0.6f));
 
 		drawList.AddLine(left, tip, M3.U32(color), 2f * scale);
 		drawList.AddLine(tip, right, M3.U32(color), 2f * scale);
 	}
 
-	private static void Paint(ImDrawListPtr drawList, Vector2 min, Vector2 max, Vector4 accent, bool expanded)
+	private static void Paint(ImDrawListPtr drawList, float2 min, float2 max, float4 accent, bool expanded)
 	{
 		var s = M3.Scheme;
 		var scale = M3.Scale;
@@ -322,7 +320,7 @@ public static class M3ExpandableCard
 		}
 	}
 
-	public readonly struct Scope(string id, Vector2 min, float width, float indent, bool expanded) : IDisposable
+	public readonly struct Scope(string id, float2 min, float width, float indent, bool expanded) : IDisposable
 	{
 		public bool Expanded => expanded;
 
@@ -339,8 +337,8 @@ public static class M3ExpandableCard
 			var bottom = contentBottom + (expanded ? M3Card.BottomPadding : 0f);
 			M3CardHost.RecordHeight(id, bottom - min.Y);
 
-			ImGui.SetCursorScreenPos(new Vector2(min.X, bottom + M3Card.Margin));
-			ImGui.Dummy(new Vector2(width, 0f));
+			ImGui.SetCursorScreenPos(new float2(min.X, bottom + M3Card.Margin));
+			ImGui.Dummy(new float2(width, 0f));
 		}
 	}
 }

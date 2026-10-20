@@ -1,5 +1,3 @@
-using Dalamud.Interface.Textures.TextureWraps;
-
 namespace RebornMaterial;
 
 // Popup menus. Open one with Open and Begin, or on a right-click with BeginContext. Item closes every open menu when picked.
@@ -28,7 +26,7 @@ public static class M3Menu
 		return Finish(ImGui.BeginPopupContextItem(id));
 	}
 
-	public static Scope BeginSub(string id, string label, FontAwesomeIcon icon = FontAwesomeIcon.None, bool enabled = true, IDalamudTextureWrap? texture = null)
+	public static Scope BeginSub(string id, string label, FontAwesomeIcon icon = FontAwesomeIcon.None, bool enabled = true, IM3Texture? texture = null)
 	{
 		var scale = M3.Scale;
 		var popupId = $"{id}_sub";
@@ -55,7 +53,7 @@ public static class M3Menu
 			x = parentMin.X - width - (2f * scale);
 		}
 
-		ImGui.SetNextWindowPos(new Vector2(x, rowMin.Y - (6f * scale)));
+		ImGui.SetNextWindowPos(new float2(x, rowMin.Y - (6f * scale)));
 		PushStyle();
 		var scope = Finish(ImGui.BeginPopup(popupId));
 		if (!scope.IsOpen)
@@ -77,7 +75,7 @@ public static class M3Menu
 		return scope;
 	}
 
-	public static bool Item(string id, string label, FontAwesomeIcon icon = FontAwesomeIcon.None, bool enabled = true, bool selected = false, string? shortcut = null, string? tooltip = null, IDalamudTextureWrap? texture = null)
+	public static bool Item(string id, string label, FontAwesomeIcon icon = FontAwesomeIcon.None, bool enabled = true, bool selected = false, string? shortcut = null, string? tooltip = null, IM3Texture? texture = null)
 	{
 		if (!M3Widgets.MenuItem(id, label, selected, icon, enabled, shortcut, tooltip, texture))
 		{
@@ -102,7 +100,7 @@ public static class M3Menu
 	public static void Heading(string text)
 	{
 		var scale = M3.Scale;
-		ImGui.Dummy(new Vector2(0f, 4f * scale));
+		ImGui.Dummy(new float2(0f, 4f * scale));
 		ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (12f * scale));
 		M3Text.Draw(text, M3TextStyle.Label);
 	}
@@ -115,7 +113,7 @@ public static class M3Menu
 	private static void PushStyle()
 	{
 		var scale = M3.Scale;
-		ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(4f, 6f) * scale);
+		ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new float2(4f, 6f) * scale);
 		ImGui.PushStyleVar(ImGuiStyleVar.PopupRounding, M3.ShapeSmall);
 		ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, ImGui.GetStyle().ItemSpacing with { Y = 0f });
 		ImGui.PushStyleColor(ImGuiCol.PopupBg, M3.Scheme.SurfaceContainer);

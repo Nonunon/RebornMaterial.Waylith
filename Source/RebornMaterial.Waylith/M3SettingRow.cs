@@ -1,27 +1,24 @@
-using Dalamud.Interface.Textures.TextureWraps;
-using Dalamud.Interface.Utility.Raii;
-
 namespace RebornMaterial;
 
 public static class M3SubGroup
 {
-	public static Scope Begin(Vector4? accent = null)
+	public static Scope Begin(float4? accent = null)
 	{
 		var scale = M3.Scale;
 		var indent = 22f * scale;
 		var start = ImGui.GetCursorScreenPos();
 		ImGui.Indent(indent);
-		ImGui.Dummy(new Vector2(0f, 2f * scale));
+		ImGui.Dummy(new float2(0f, 2f * scale));
 
 		return new Scope(start, indent, accent ?? M3.Scheme.OutlineVariant);
 	}
 
-	public readonly struct Scope(Vector2 start, float indent, Vector4 accent) : IDisposable
+	public readonly struct Scope(float2 start, float indent, float4 accent) : IDisposable
 	{
 		public void Dispose()
 		{
 			var scale = M3.Scale;
-			ImGui.Dummy(new Vector2(0f, 2f * scale));
+			ImGui.Dummy(new float2(0f, 2f * scale));
 			var end = ImGui.GetCursorScreenPos();
 			ImGui.Unindent(indent);
 
@@ -29,8 +26,8 @@ public static class M3SubGroup
 			if (end.Y > start.Y)
 			{
 				ImGui.GetWindowDrawList().AddLine(
-					new Vector2(x, start.Y + (2f * scale)),
-					new Vector2(x, end.Y - (4f * scale)),
+					new float2(x, start.Y + (2f * scale)),
+					new float2(x, end.Y - (4f * scale)),
 					M3.U32(accent, 0.45f), 2f * scale);
 			}
 		}
@@ -39,10 +36,10 @@ public static class M3SubGroup
 
 public readonly struct M3RowInfo
 {
-	public Vector2 Min { get; init; }
-	public Vector2 Max { get; init; }
+	public float2 Min { get; init; }
+	public float2 Max { get; init; }
 
-	public Vector2 ControlPosition { get; init; }
+	public float2 ControlPosition { get; init; }
 
 	public float ControlWidth { get; init; }
 
@@ -79,12 +76,12 @@ public static class M3SettingRow
 	public static M3RowInfo Begin(
 		string label,
 		string? supporting,
-		Vector2 controlSize,
-		Vector4? labelColor = null,
+		float2 controlSize,
+		float4? labelColor = null,
 		FontAwesomeIcon leadingIcon = FontAwesomeIcon.None,
 		bool disabled = false,
 		bool strikeThrough = false,
-		IDalamudTextureWrap? leadingTexture = null,
+		IM3Texture? leadingTexture = null,
 		float leadingTextureSize = 32f)
 	{
 		var s = M3.Scheme;
@@ -108,7 +105,7 @@ public static class M3SettingRow
 			? MathF.Max(32f * scale, innerWidth - controlSize.X - ControlGap)
 			: innerWidth;
 
-		var labelSize = string.IsNullOrEmpty(label) ? Vector2.Zero : ImGui.CalcTextSize(label, false, labelWidth);
+		var labelSize = string.IsNullOrEmpty(label) ? float2.Zero : ImGui.CalcTextSize(label, false, labelWidth);
 
 		var supportingHeight = 0f;
 		if (!string.IsNullOrEmpty(supporting))
@@ -124,7 +121,7 @@ public static class M3SettingRow
 		var belowHeight = hasControl && controlBelow ? controlSize.Y + (8f * scale) : 0f;
 		var height = (PaddingY * 2f) + headlineHeight + supportingHeight + belowHeight;
 
-		ImGui.Dummy(new Vector2(width, height));
+		ImGui.Dummy(new float2(width, height));
 		var max = ImGui.GetItemRectMax();
 		var hovered = ImGui.IsMouseHoveringRect(min, max, false) && ImGui.IsWindowHovered(ImGuiHoveredFlags.ChildWindows);
 
@@ -140,22 +137,22 @@ public static class M3SettingRow
 
 		if (texture != null)
 		{
-			var textureMin = new Vector2(min.X + PaddingX, min.Y + PaddingY + ((headlineHeight - textureExtent) * 0.5f));
-			drawList.AddImage(texture.Handle, textureMin, textureMin + new Vector2(textureExtent, textureExtent),
-				Vector2.Zero, Vector2.One, M3.U32(Vector4.One, disabled ? M3.DisabledContent : 1f));
+			var textureMin = new float2(min.X + PaddingX, min.Y + PaddingY + ((headlineHeight - textureExtent) * 0.5f));
+			drawList.AddImage(texture.Handle, textureMin, textureMin + new float2(textureExtent, textureExtent),
+				float2.Zero, float2.One, M3.U32(float4.One, disabled ? M3.DisabledContent : 1f));
 		}
 		else if (leadingIcon != FontAwesomeIcon.None)
 		{
 			var iconSize = M3Draw.MeasureIcon(leadingIcon);
 			M3Draw.Icon(drawList, leadingIcon,
-				new Vector2(min.X + PaddingX, min.Y + PaddingY + ((headlineHeight - iconSize.Y) * 0.5f)),
+				new float2(min.X + PaddingX, min.Y + PaddingY + ((headlineHeight - iconSize.Y) * 0.5f)),
 				M3.Alpha(s.Primary, disabled ? M3.DisabledContent : 0.9f));
 		}
 
 		if (!string.IsNullOrEmpty(label))
 		{
 			var labelY = min.Y + PaddingY + ((headlineHeight - labelSize.Y) * 0.5f);
-			_ = M3Draw.WrappedText(label, new Vector2(textLeft, labelY), labelWidth, contentColor);
+			_ = M3Draw.WrappedText(label, new float2(textLeft, labelY), labelWidth, contentColor);
 
 			if (strikeThrough)
 			{
@@ -165,7 +162,7 @@ public static class M3SettingRow
 				{
 					var y = labelY + (lineHeight * (line + 0.5f));
 					var lineWidth = line == (int)lineCount - 1 ? MathF.Min(labelSize.X, labelWidth) : labelWidth;
-					drawList.AddLine(new Vector2(textLeft, y), new Vector2(textLeft + lineWidth, y), M3.U32(contentColor, 0.7f), 1f * scale);
+					drawList.AddLine(new float2(textLeft, y), new float2(textLeft + lineWidth, y), M3.U32(contentColor, 0.7f), 1f * scale);
 				}
 			}
 		}
@@ -174,14 +171,14 @@ public static class M3SettingRow
 		{
 			using var font = ImRaii.PushFont(M3.LabelSmall);
 			_ = M3Draw.WrappedText(supporting,
-				new Vector2(textLeft, min.Y + PaddingY + headlineHeight + (4f * scale)),
+				new float2(textLeft, min.Y + PaddingY + headlineHeight + (4f * scale)),
 				innerWidth,
 				M3.Alpha(s.OnSurfaceVariant, disabled ? M3.DisabledContent : 0.88f));
 		}
 
 		var controlPosition = controlBelow
-			? new Vector2(textLeft, min.Y + PaddingY + headlineHeight + supportingHeight + (8f * scale))
-			: new Vector2(max.X - PaddingX - controlSize.X, min.Y + PaddingY + ((headlineHeight - controlSize.Y) * 0.5f));
+			? new float2(textLeft, min.Y + PaddingY + headlineHeight + supportingHeight + (8f * scale))
+			: new float2(max.X - PaddingX - controlSize.X, min.Y + PaddingY + ((headlineHeight - controlSize.Y) * 0.5f));
 
 		if (hasControl)
 		{
@@ -201,11 +198,11 @@ public static class M3SettingRow
 
 	public static void End(in M3RowInfo row)
 	{
-		ImGui.SetCursorScreenPos(new Vector2(row.Min.X, row.Max.Y));
-		ImGui.Dummy(new Vector2(row.Max.X - row.Min.X, 2f * M3.Scale));
+		ImGui.SetCursorScreenPos(new float2(row.Min.X, row.Max.Y));
+		ImGui.Dummy(new float2(row.Max.X - row.Min.X, 2f * M3.Scale));
 	}
 
-	public static bool NavigationRow(string id, string label, string? supporting, FontAwesomeIcon leadingIcon, FontAwesomeIcon trailingIcon, Vector4? accent = null)
+	public static bool NavigationRow(string id, string label, string? supporting, FontAwesomeIcon leadingIcon, FontAwesomeIcon trailingIcon, float4? accent = null)
 	{
 		var s = M3.Scheme;
 		var scale = M3.Scale;
@@ -225,7 +222,7 @@ public static class M3SettingRow
 		}
 
 		var height = (PaddingY * 2f) + labelSize.Y + supportingHeight;
-		var pressed = ImGui.InvisibleButton(id, new Vector2(width, height));
+		var pressed = ImGui.InvisibleButton(id, new float2(width, height));
 		var hovered = ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenBlockedByActiveItem);
 		var held = ImGui.IsItemActive();
 		var min = ImGui.GetItemRectMin();
@@ -243,15 +240,15 @@ public static class M3SettingRow
 		if (leadingIcon != FontAwesomeIcon.None)
 		{
 			var iconSize = M3Draw.MeasureIcon(leadingIcon);
-			M3Draw.Icon(drawList, leadingIcon, new Vector2(min.X + PaddingX, min.Y + PaddingY + ((labelSize.Y - iconSize.Y) * 0.5f)), tone);
+			M3Draw.Icon(drawList, leadingIcon, new float2(min.X + PaddingX, min.Y + PaddingY + ((labelSize.Y - iconSize.Y) * 0.5f)), tone);
 		}
 
-		_ = M3Draw.WrappedText(label, new Vector2(textLeft, min.Y + PaddingY), textWidth, M3.Alpha(s.OnSurface, 0.95f));
+		_ = M3Draw.WrappedText(label, new float2(textLeft, min.Y + PaddingY), textWidth, M3.Alpha(s.OnSurface, 0.95f));
 
 		if (!string.IsNullOrEmpty(supporting))
 		{
 			using var font = ImRaii.PushFont(M3.LabelSmall);
-			_ = M3Draw.WrappedText(supporting, new Vector2(textLeft, min.Y + PaddingY + labelSize.Y + (4f * scale)), textWidth,
+			_ = M3Draw.WrappedText(supporting, new float2(textLeft, min.Y + PaddingY + labelSize.Y + (4f * scale)), textWidth,
 				M3.Alpha(s.OnSurfaceVariant, 0.85f));
 		}
 
@@ -259,12 +256,12 @@ public static class M3SettingRow
 		{
 			var iconSize = M3Draw.MeasureIcon(trailingIcon);
 			M3Draw.Icon(drawList, trailingIcon,
-				new Vector2(max.X - PaddingX - iconSize.X, min.Y + ((height - iconSize.Y) * 0.5f)),
+				new float2(max.X - PaddingX - iconSize.X, min.Y + ((height - iconSize.Y) * 0.5f)),
 				M3.Alpha(s.OnSurfaceVariant, hovered ? 1f : 0.7f));
 		}
 
-		ImGui.SetCursorScreenPos(new Vector2(min.X, max.Y));
-		ImGui.Dummy(new Vector2(width, 2f * scale));
+		ImGui.SetCursorScreenPos(new float2(min.X, max.Y));
+		ImGui.Dummy(new float2(width, 2f * scale));
 		return pressed;
 	}
 }

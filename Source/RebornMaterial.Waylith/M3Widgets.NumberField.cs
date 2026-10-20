@@ -1,5 +1,3 @@
-using Dalamud.Interface.Utility.Raii;
-
 namespace RebornMaterial;
 
 public static partial class M3Widgets
@@ -84,7 +82,7 @@ public static partial class M3Widgets
 	{
 		var (display, id) = SplitLabel(label);
 		var width = NumberFieldWidth(step > 0f, unit);
-		var row = M3SettingRow.Begin(display, supporting, new Vector2(width, NumberFieldHeight), disabled: !enabled);
+		var row = M3SettingRow.Begin(display, supporting, new float2(width, NumberFieldHeight), disabled: !enabled);
 		ImGui.SetCursorScreenPos(row.ControlPosition);
 		var changed = NumberField($"##{id}_number", ref value, width, step, min, max, format, unit, enabled);
 		M3SettingRow.End(row);
@@ -95,20 +93,20 @@ public static partial class M3Widgets
 	{
 		var (display, id) = SplitLabel(label);
 		var width = NumberFieldWidth(step > 0, unit);
-		var row = M3SettingRow.Begin(display, supporting, new Vector2(width, NumberFieldHeight), disabled: !enabled);
+		var row = M3SettingRow.Begin(display, supporting, new float2(width, NumberFieldHeight), disabled: !enabled);
 		ImGui.SetCursorScreenPos(row.ControlPosition);
 		var changed = NumberField($"##{id}_number", ref value, width, step, min, max, unit, enabled);
 		M3SettingRow.End(row);
 		return changed;
 	}
 
-	private readonly record struct NumberLayout(Vector2 Min, Vector2 Max, float UnitX);
+	private readonly record struct NumberLayout(float2 Min, float2 Max, float UnitX);
 
 	private static ImRaii.ColorDisposable PushClearFrame()
 	{
-		return ImRaii.PushColor(ImGuiCol.FrameBg, new Vector4(0f, 0f, 0f, 0f))
-			.Push(ImGuiCol.FrameBgHovered, new Vector4(0f, 0f, 0f, 0f))
-			.Push(ImGuiCol.FrameBgActive, new Vector4(0f, 0f, 0f, 0f));
+		return ImRaii.PushColor(ImGuiCol.FrameBg, new float4(0f, 0f, 0f, 0f))
+			.Push(ImGuiCol.FrameBgHovered, new float4(0f, 0f, 0f, 0f))
+			.Push(ImGuiCol.FrameBgActive, new float4(0f, 0f, 0f, 0f));
 	}
 
 	private static NumberLayout BeginNumberField(float width, bool steppers, string? unit)
@@ -117,14 +115,14 @@ public static partial class M3Widgets
 		var height = NumberFieldHeight;
 		var framePadding = ImGui.GetStyle().FramePadding.X;
 		var min = ImGui.GetCursorScreenPos();
-		var max = min + new Vector2(width, height);
+		var max = min + new float2(width, height);
 
 		var stepperRoom = steppers ? (StepperDiameter * 2f) + (6f * scale) : 0f;
 		var unitWidth = string.IsNullOrEmpty(unit) ? 0f : ImGui.CalcTextSize(unit).X + (6f * scale);
 		var inputLeft = min.X + (12f * scale) - framePadding;
 		var inputRight = max.X - (8f * scale) - stepperRoom - unitWidth + framePadding;
 
-		ImGui.SetCursorScreenPos(new Vector2(inputLeft, min.Y + ((height - ImGui.GetFrameHeight()) * 0.5f)));
+		ImGui.SetCursorScreenPos(new float2(inputLeft, min.Y + ((height - ImGui.GetFrameHeight()) * 0.5f)));
 		ImGui.SetNextItemWidth(MathF.Max(24f * scale, inputRight - inputLeft));
 		return new NumberLayout(min, max, inputRight - framePadding + (6f * scale));
 	}
@@ -146,7 +144,7 @@ public static partial class M3Widgets
 		if (!string.IsNullOrEmpty(unit))
 		{
 			var unitSize = ImGui.CalcTextSize(unit);
-			drawList.AddText(new Vector2(unitX, min.Y + ((height - unitSize.Y) * 0.5f)), M3.U32(s.OnSurfaceVariant, 0.9f * dim), unit);
+			drawList.AddText(new float2(unitX, min.Y + ((height - unitSize.Y) * 0.5f)), M3.U32(s.OnSurfaceVariant, 0.9f * dim), unit);
 		}
 
 		var direction = 0;
@@ -156,24 +154,24 @@ public static partial class M3Widgets
 			var top = min.Y + ((height - diameter) * 0.5f);
 			var right = max.X - (4f * scale);
 
-			ImGui.PushButtonRepeat(true);
-			ImGui.SetCursorScreenPos(new Vector2(right - (diameter * 2f) - (2f * scale), top));
+			ImGui.PushItemFlag(ImGuiItemFlags.ButtonRepeat, true);
+			ImGui.SetCursorScreenPos(new float2(right - (diameter * 2f) - (2f * scale), top));
 			if (IconButton("##less", FontAwesomeIcon.Minus, null, diameter: diameter, enabled: enabled))
 			{
 				direction = -1;
 			}
 
-			ImGui.SetCursorScreenPos(new Vector2(right - diameter, top));
+			ImGui.SetCursorScreenPos(new float2(right - diameter, top));
 			if (IconButton("##more", FontAwesomeIcon.Plus, null, diameter: diameter, enabled: enabled))
 			{
 				direction = 1;
 			}
 
-			ImGui.PopButtonRepeat();
+			ImGui.PopItemFlag();
 		}
 
 		ImGui.SetCursorScreenPos(min);
-		ImGui.Dummy(new Vector2(width, height));
+		ImGui.Dummy(new float2(width, height));
 		return direction;
 	}
 }

@@ -110,6 +110,27 @@ public static class M3Draw
 		drawList.AddRectFilledMultiColor(min, max, topColor, topColor, bottomColor, bottomColor);
 	}
 
+	public static float2 MeasureIcon(FontAwesomeIcon icon)
+	{
+		using var font = ImRaii.PushFont(M3Icons.Font);
+		return ImGui.CalcTextSize(icon.ToIconString());
+	}
+
+	public static void Icon(ImDrawListPtr drawList, FontAwesomeIcon icon, float2 position, float4 color)
+	{
+		using var font = ImRaii.PushFont(M3Icons.Font);
+		drawList.AddText(M3Icons.Font, ImGui.GetFontSize(), position, M3.U32(color), icon.ToIconString());
+	}
+
+	public static void IconCentered(ImDrawListPtr drawList, FontAwesomeIcon icon, float2 min, float2 max, float4 color, float scale = 1f)
+	{
+		using var font = ImRaii.PushFont(M3Icons.Font);
+		var text = icon.ToIconString();
+		var size = ImGui.CalcTextSize(text) * scale;
+		var position = min + (((max - min) - size) * 0.5f);
+		drawList.AddText(M3Icons.Font, ImGui.GetFontSize() * scale, position, M3.U32(color), text);
+	}
+
 	// Outlines the last item while the keyboard or a gamepad has it focused. Mouse users never see it.
 	public static void FocusRing(float2 min, float2 max, float rounding)
 	{
@@ -122,6 +143,11 @@ public static class M3Draw
 		var gap = 2f * scale;
 		ImGui.GetWindowDrawList().AddRect(min - new float2(gap), max + new float2(gap), M3.U32(M3.Scheme.Secondary),
 			rounding + gap, ImDrawFlags.None, 2.5f * scale);
+	}
+
+	public static bool Texture(ImDrawListPtr drawList, IM3Texture? texture, float2 min, float size, float alpha = 1f)
+	{
+		return M3ActionIcon.Image(drawList, texture, min, min + new float2(size, size), M3.ShapeExtraSmall, alpha);
 	}
 
 	public static float WrappedText(string text, float2 position, float wrapWidth, float4 color)

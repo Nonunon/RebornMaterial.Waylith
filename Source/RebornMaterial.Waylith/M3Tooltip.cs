@@ -1,5 +1,3 @@
-using Dalamud.Interface.Utility.Raii;
-
 namespace RebornMaterial;
 
 public static class M3Tooltip
@@ -33,6 +31,6 @@ public static class M3Tooltip
 
 		using var tooltip = ImRaii.Tooltip();
 		using var wrap = ImRaii.TextWrapPos(ImGui.GetFontSize() * WrapEms);
-		ImGui.TextUnformatted(text);
+		ImGui.Text(text);
 	}
 }

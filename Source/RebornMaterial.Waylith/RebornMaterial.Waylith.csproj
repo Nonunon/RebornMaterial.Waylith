@@ -23,6 +23,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Fonts\FontAwesomeFreeSolid.otf" LogicalName="RebornMaterial.Fonts.FontAwesomeFreeSolid.otf" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Reference Include="Assembly-CSharp" HintPath="$(RimWorld17Dir)\Assembly-CSharp.dll" Private="false" />
     <Reference Include="UnityStubs" HintPath="$(RimWorld17Dir)\UnityStubs.dll" Private="false" />
     <Reference Include="Brutal.ImGui" HintPath="$(RimWorld17Dir)\Brutal.ImGui.dll" Private="false" />

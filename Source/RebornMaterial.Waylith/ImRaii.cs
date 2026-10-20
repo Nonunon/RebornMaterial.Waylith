@@ -2,54 +2,46 @@ namespace RebornMaterial;
 
 public static class ImRaii
 {
-	public static FontDisposable PushFont(M3Font font)
+	public static FontDisposable PushFont(M3Font font, bool condition = true)
 	{
+		if (!condition)
+		{
+			return default;
+		}
+
 		M3Fonts.Push(font);
+		return new FontDisposable(true);
+	}
+
+	public static FontDisposable PushFont(ImFontPtr font, bool condition = true)
+	{
+		if (!condition)
+		{
+			return default;
+		}
+
+		ImGui.PushFont(font, 0f);
 		return new FontDisposable(true);
 	}
 
 	public static ColorDisposable PushColor(ImGuiCol target, float4 color, bool condition = true)
 	{
-		if (!condition)
-		{
-			return default;
-		}
-
-		ImGui.PushStyleColor(target, color);
-		return new ColorDisposable(1);
+		return new ColorDisposable().Push(target, color, condition);
 	}
 
 	public static ColorDisposable PushColor(ImGuiCol target, ImColor8 color, bool condition = true)
 	{
-		if (!condition)
-		{
-			return default;
-		}
-
-		ImGui.PushStyleColor(target, color);
-		return new ColorDisposable(1);
+		return new ColorDisposable().Push(target, color, condition);
 	}
 
 	public static StyleDisposable PushStyle(ImGuiStyleVar target, float value, bool condition = true)
 	{
-		if (!condition)
-		{
-			return default;
-		}
-
-		ImGui.PushStyleVar(target, value);
-		return new StyleDisposable(1);
+		return new StyleDisposable().Push(target, value, condition);
 	}
 
 	public static StyleDisposable PushStyle(ImGuiStyleVar target, float2 value, bool condition = true)
 	{
-		if (!condition)
-		{
-			return default;
-		}
-
-		ImGui.PushStyleVar(target, value);
-		return new StyleDisposable(1);
+		return new StyleDisposable().Push(target, value, condition);
 	}
 
 	public static IdDisposable PushId(string id)
@@ -64,6 +56,36 @@ public static class ImRaii
 		return new IdDisposable(true);
 	}
 
+	public static EndDisposable Disabled(bool disabled = true)
+	{
+		ImGui.BeginDisabled(disabled);
+		return new EndDisposable(true, true, ImGui.EndDisabled);
+	}
+
+	public static EndDisposable TextWrapPos(float position)
+	{
+		ImGui.PushTextWrapPos(position);
+		return new EndDisposable(true, true, ImGui.PopTextWrapPos);
+	}
+
+	public static EndDisposable Tooltip()
+	{
+		var open = ImGui.BeginTooltip();
+		return new EndDisposable(open, open, ImGui.EndTooltip);
+	}
+
+	public static EndDisposable Popup(string id, ImGuiWindowFlags flags = ImGuiWindowFlags.None)
+	{
+		var open = ImGui.BeginPopup(id, flags);
+		return new EndDisposable(open, open, ImGui.EndPopup);
+	}
+
+	public static EndDisposable Child(string id, float2 size, bool border = false, ImGuiWindowFlags flags = ImGuiWindowFlags.None)
+	{
+		var open = ImGui.BeginChild(id, size, border ? ImGuiChildFlags.Borders : ImGuiChildFlags.None, flags);
+		return new EndDisposable(open, true, ImGui.EndChild);
+	}
+
 	public readonly struct FontDisposable(bool pushed) : IDisposable
 	{
 		public void Dispose()
@@ -75,24 +97,74 @@ public static class ImRaii
 		}
 	}
 
-	public readonly struct ColorDisposable(int count) : IDisposable
+	public sealed class ColorDisposable : IDisposable
 	{
+		private int _count;
+
+		public ColorDisposable Push(ImGuiCol target, float4 color, bool condition = true)
+		{
+			if (condition)
+			{
+				ImGui.PushStyleColor(target, color);
+				_count++;
+			}
+
+			return this;
+		}
+
+		public ColorDisposable Push(ImGuiCol target, ImColor8 color, bool condition = true)
+		{
+			if (condition)
+			{
+				ImGui.PushStyleColor(target, color);
+				_count++;
+			}
+
+			return this;
+		}
+
 		public void Dispose()
 		{
-			if (count > 0)
+			if (_count > 0)
 			{
-				ImGui.PopStyleColor(count);
+				ImGui.PopStyleColor(_count);
+				_count = 0;
 			}
 		}
 	}
 
-	public readonly struct StyleDisposable(int count) : IDisposable
+	public sealed class StyleDisposable : IDisposable
 	{
+		private int _count;
+
+		public StyleDisposable Push(ImGuiStyleVar target, float value, bool condition = true)
+		{
+			if (condition)
+			{
+				ImGui.PushStyleVar(target, value);
+				_count++;
+			}
+
+			return this;
+		}
+
+		public StyleDisposable Push(ImGuiStyleVar target, float2 value, bool condition = true)
+		{
+			if (condition)
+			{
+				ImGui.PushStyleVar(target, value);
+				_count++;
+			}
+
+			return this;
+		}
+
 		public void Dispose()
 		{
-			if (count > 0)
+			if (_count > 0)
 			{
-				ImGui.PopStyleVar(count);
+				ImGui.PopStyleVar(_count);
+				_count = 0;
 			}
 		}
 	}
@@ -104,6 +176,24 @@ public static class ImRaii
 			if (pushed)
 			{
 				ImGui.PopID();
+			}
+		}
+	}
+
+	public readonly struct EndDisposable(bool success, bool end, Action endAction) : IDisposable
+	{
+		public bool Success => success;
+
+		public static implicit operator bool(EndDisposable value)
+		{
+			return value.Success;
+		}
+
+		public void Dispose()
+		{
+			if (end)
+			{
+				endAction();
 			}
 		}
 	}

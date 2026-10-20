@@ -1,6 +1,3 @@
-using Dalamud.Interface.Textures;
-using Dalamud.Interface.Textures.TextureWraps;
-
 namespace RebornMaterial;
 
 // Recast state for the cooldown overlay, in seconds. Elapsed counts up towards RecastTime, the time for one charge.
@@ -13,20 +10,14 @@ public static class M3ActionIcon
 		return MathF.Min(M3.ShapeSmall, size * 0.18f);
 	}
 
-	// A game icon by ID, such as an action's Icon column.
-	public static bool Draw(string id, uint iconId, float size, M3Cooldown? cooldown = null, bool enabled = true, string? tooltip = null)
-	{
-		return Draw(id, GameIcon(iconId), size, cooldown, enabled, tooltip);
-	}
-
 	// A null texture draws an empty slot, which never reports a press.
-	public static bool Draw(string id, IDalamudTextureWrap? texture, float size, M3Cooldown? cooldown = null, bool enabled = true, string? tooltip = null)
+	public static bool Draw(string id, IM3Texture? texture, float size, M3Cooldown? cooldown = null, bool enabled = true, string? tooltip = null)
 	{
 		var s = M3.Scheme;
 
 		// Size settings can go to 0, which InvisibleButton rejects.
 		size = MathF.Max(size, 1f);
-		var extent = new Vector2(size, size);
+		var extent = new float2(size, size);
 
 		var pressed = ImGui.InvisibleButton(id, extent);
 		var hovered = ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenBlockedByActiveItem);
@@ -63,18 +54,7 @@ public static class M3ActionIcon
 		return pressed;
 	}
 
-	// Null while the icon loads, or when it doesn't exist.
-	public static IDalamudTextureWrap? GameIcon(uint iconId, bool highResolution = true)
-	{
-		if (iconId == 0 || !M3Services.TextureProvider.TryGetFromGameIcon(new GameIconLookup(iconId, false, highResolution), out var icon))
-		{
-			return null;
-		}
-
-		return icon.GetWrapOrDefault();
-	}
-
-	public static bool Image(ImDrawListPtr drawList, IDalamudTextureWrap? texture, Vector2 min, Vector2 max, float rounding, float alpha = 1f)
+	public static bool Image(ImDrawListPtr drawList, IM3Texture? texture, float2 min, float2 max, float rounding, float alpha = 1f)
 	{
 		if (texture == null)
 		{
@@ -83,13 +63,14 @@ public static class M3ActionIcon
 
 		try
 		{
-			var handle = texture.Handle;
-			if (handle.IsNull)
+			if (!texture.IsValid)
 			{
 				return false;
 			}
 
-			drawList.AddImageRounded(handle, min, max, Vector2.Zero, Vector2.One, M3.U32(Vector4.One, alpha), rounding);
+			var handle = texture.Handle;
+
+			drawList.AddImageRounded(handle, min, max, float2.Zero, float2.One, M3.U32(float4.One, alpha), rounding);
 			return true;
 		}
 		catch (ObjectDisposedException)
@@ -98,14 +79,14 @@ public static class M3ActionIcon
 		}
 	}
 
-	public static void EmptySlot(ImDrawListPtr drawList, Vector2 min, Vector2 max, float rounding)
+	public static void EmptySlot(ImDrawListPtr drawList, float2 min, float2 max, float rounding)
 	{
 		var s = M3.Scheme;
 		drawList.AddRectFilled(min, max, M3.U32(s.SurfaceContainerLowest, 0.55f), rounding);
 		drawList.AddRect(min, max, M3.U32(s.OutlineVariant, 0.6f), rounding, ImDrawFlags.None, 1f * M3.Scale);
 	}
 
-	private static void Cooldown(ImDrawListPtr drawList, M3Cooldown cooldown, Vector2 min, Vector2 max, float rounding)
+	private static void Cooldown(ImDrawListPtr drawList, M3Cooldown cooldown, float2 min, float2 max, float rounding)
 	{
 		var s = M3.Scheme;
 		var scale = M3.Scale;
@@ -131,7 +112,7 @@ public static class M3ActionIcon
 			var text = recast <= 0f ? "0" : ((int)(recast - elapsed) + 1).ToString();
 			var textSize = ImGui.CalcTextSize(text);
 			var textPosition = center - (textSize * 0.5f);
-			drawList.AddText(textPosition + (new Vector2(1f, 1f) * scale), M3.U32(s.Scrim, 0.8f), text);
+			drawList.AddText(textPosition + (new float2(1f, 1f) * scale), M3.U32(s.Scrim, 0.8f), text);
 			drawList.AddText(textPosition, M3.U32(s.OnSurface), text);
 		}
 
@@ -141,7 +122,7 @@ public static class M3ActionIcon
 		}
 	}
 
-	private static void Charges(ImDrawListPtr drawList, int current, int maximum, Vector2 min, Vector2 max)
+	private static void Charges(ImDrawListPtr drawList, int current, int maximum, float2 min, float2 max)
 	{
 		var s = M3.Scheme;
 		var scale = M3.Scale;
@@ -156,13 +137,13 @@ public static class M3ActionIcon
 
 		var pad = 2f * scale;
 		drawList.AddRectFilled(
-			new Vector2(x - radius - pad, y - radius - pad),
-			new Vector2(x - radius + rowWidth + pad, y + radius + pad),
+			new float2(x - radius - pad, y - radius - pad),
+			new float2(x - radius + rowWidth + pad, y + radius + pad),
 			M3.U32(s.Scrim, 0.55f), radius + pad);
 
 		for (var i = 0; i < maximum; i++)
 		{
-			var pip = new Vector2(x + (i * ((radius * 2f) + gap)), y);
+			var pip = new float2(x + (i * ((radius * 2f) + gap)), y);
 			if (i < current)
 			{
 				drawList.AddCircleFilled(pip, radius, M3.U32(s.Primary), 12);

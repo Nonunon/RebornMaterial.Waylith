@@ -8,17 +8,24 @@ Licensed under the GNU LGPL v3, like the original (`LICENSE`; the GPL v3 it buil
 
 | File | State |
 | --- | --- |
-| `M3Palette.cs` | Unchanged apart from vector types |
+| `M3Palette.cs`, `M3Settings.cs` | Unchanged apart from vector types |
 | `M3.cs` | Dalamud plugin setup removed; scale follows RimWorld's UI scale; font roles are `M3Font` |
 | `M3Style.cs` | ImGui 1.92 colour names (`TabSelected`, `TabDimmed`, `NavCursor`, ...), plus the 1.92 slots for tab overlines, links, the text cursor and tree lines |
-| `M3Draw.cs` | Icon and texture helpers left out for now |
-| `M3Settings.cs` | Unchanged apart from vector types |
+| `M3Draw.cs` | Icons draw with the bundled icon font |
+| `M3Widgets.cs`, `M3Widgets.NumberField.cs` | Text inputs go through `M3Input`; button repeat uses `PushItemFlag`; hotkey and reorder-list resets left out |
+| `M3Card.cs`, `M3Navigation.cs`, `M3Menu.cs`, `M3SettingRow.cs`, `M3Text.cs`, `M3TextField.cs`, `M3Tooltip.cs`, `M3Badge.cs`, `M3Flow.cs` | Unchanged apart from types and fonts |
+| `M3ActionIcon.cs` | FFXIV game-icon lookup removed; images take an `IM3Texture` |
 | `M3Fonts.cs` | Rewritten: the game's font at any size through `PushFont(font, size)` |
+| `M3Icons.cs` | New: the FontAwesome icons the library uses (codepoints match Dalamud's `FontAwesomeIcon`), loaded from an embedded Font Awesome Free Solid 7.1 font |
+| `M3Input.cs` | New: `ref string` text input on top of Brutal's `ImInputString` |
+| `M3Texture.cs` | New: `IM3Texture`, standing in for Dalamud's texture wrap |
 | `ImRaii.cs` | New: push and pop helpers in the style of Dalamud's `ImRaii` |
 
-Other changes across files: `Vector2`/`Vector4` are `float2`/`float4`, colours are `ImColor8`, and `ImGui.TextUnformatted` is `ImGui.Text`.
+Other changes across files: `Vector2`/`Vector4` are `float2`/`float4`, colours are `ImColor8`, `ImGuiP` is `ImGui.Internal`, `ImGui.TextUnformatted` is `ImGui.Text`, and `TextWrapped` escapes `%` (Brutal passes it to printf).
 
-Not ported yet: widgets, cards, navigation, menus, dialogs, snackbars, charts, the tree, the window fold, the gallery, icons and game textures.
+Not ported yet: keyboard input for text fields (RimWorld does not pass keys to ImGui), the hotkey field, reorder lists, the tree, dialogs, snackbars, charts, the hero header, the window fold, the gallery, and a way to turn RimWorld textures into `IM3Texture`.
+
+The icon font is Font Awesome Free by Fonticons, Inc., under the SIL OFL 1.1 (`LICENSE.FontAwesome.txt`).
 
 ## Using it
 

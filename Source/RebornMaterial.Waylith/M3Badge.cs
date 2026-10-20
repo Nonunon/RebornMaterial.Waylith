@@ -1,12 +1,10 @@
-using Dalamud.Interface.Utility.Raii;
-
 namespace RebornMaterial;
 
 // A tag on a line of text. It reserves the frame height and centres itself in it, to line up with
 // frame-aligned text and framed widgets.
 public static class M3Badge
 {
-	public static void Draw(string label, Vector4 accent, string? tooltip = null)
+	public static void Draw(string label, float4 accent, string? tooltip = null)
 	{
 		var scale = M3.Scale;
 		var frameHeight = ImGui.GetFrameHeight();
@@ -16,16 +14,16 @@ public static class M3Badge
 		using (ImRaii.PushFont(M3.LabelSmall))
 		{
 			var textSize = ImGui.CalcTextSize(label);
-			var pillSize = new Vector2(textSize.X + (paddingX * 2f), lineHeight);
+			var pillSize = new float2(textSize.X + (paddingX * 2f), lineHeight);
 
-			ImGui.Dummy(new Vector2(pillSize.X, frameHeight));
-			var pillMin = ImGui.GetItemRectMin() + new Vector2(0f, (frameHeight - lineHeight) * 0.5f);
+			ImGui.Dummy(new float2(pillSize.X, frameHeight));
+			var pillMin = ImGui.GetItemRectMin() + new float2(0f, (frameHeight - lineHeight) * 0.5f);
 			var pillMax = pillMin + pillSize;
 
 			var drawList = ImGui.GetWindowDrawList();
 			drawList.AddRectFilled(pillMin, pillMax, M3.U32(accent, 0.18f), M3.ShapeFull);
 			drawList.AddRect(pillMin, pillMax, M3.U32(accent, 0.45f), M3.ShapeFull, ImDrawFlags.None, 1f * scale);
-			drawList.AddText(new Vector2(pillMin.X + paddingX, pillMin.Y + ((lineHeight - textSize.Y) * 0.5f)), M3.U32(accent, 0.95f), label);
+			drawList.AddText(new float2(pillMin.X + paddingX, pillMin.Y + ((lineHeight - textSize.Y) * 0.5f)), M3.U32(accent, 0.95f), label);
 		}
 
 		if (!string.IsNullOrEmpty(tooltip) && ImGui.IsItemHovered())
