@@ -36,11 +36,15 @@ Other changes across files: `Vector2`/`Vector4` are `float2`/`float4`, colours a
 
 The icon font is Font Awesome Free by Fonticons, Inc., under the SIL OFL 1.1 (`LICENSE.FontAwesome.txt`).
 
+## Building
+
+Needs the .NET 10 SDK and RimWorld 1.7. The project references the game's own DLLs (`Assembly-CSharp`, `UnityStubs`, `Waylith`, `Brutal.*`) from the game folder; if RimWorld is not at `F:\Steam\steamapps\common\RimWorld`, build with `dotnet build -c Release -p:RimWorld17Dir=<your RimWorld folder>`. None of the game's files are included here.
+
 ## Using it
 
 Reference the project from a mod's csproj; the DLL is copied into the mod's `Assemblies` folder. A mod can ship this DLL next to its own under any licence, as long as the DLL stays a separate file and its source (with any changes) stays available under the LGPL v3.
 
-A Dear ImGui window drawn from a RimWorld mod (see `E:\Rimworld-Mods\ImGuiShowcase` for a full one):
+A Dear ImGui window drawn from a RimWorld mod:
 
 1. Call `M3.Initialize(settings)` once.
 2. In a `Verse.Window`'s `ExtraOnGUI`, during the Repaint event only: call `M3Host.FeedInput()`, then `M3.BeginFrame()`, then draw inside `using (M3Style.Push()) { ... }` between `ImGui.Begin` and `ImGui.End`.
