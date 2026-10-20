@@ -91,7 +91,7 @@ public static class M3Tree
 		if (trailingSize.X > 0f)
 		{
 			drawList.AddText(new float2(max.X - (8f * scale) - trailingSize.X, min.Y + ((height - trailingSize.Y) * 0.5f)),
-				M3.U32(s.OnSurfaceVariant, 0.85f), trailing);
+				M3.U32(s.OnSurfaceVariant, 0.85f), trailing ?? string.Empty);
 		}
 
 		M3Draw.FocusRing(min, max, M3.ShapeSmall);

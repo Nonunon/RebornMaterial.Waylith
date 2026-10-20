@@ -30,8 +30,11 @@ public static class M3Host
 	private static bool _super;
 	private static bool _hooked;
 	private static int _fedFrame = -1;
+	private static bool _focused = true;
 
 	public static int MappedKeyCount => Keys.Length;
+
+	public static string ClipboardSource { get; private set; } = "None";
 
 	public static void FeedInput()
 	{
@@ -45,6 +48,18 @@ public static class M3Host
 		Hook();
 
 		var io = ImGui.GetIO();
+		var focused = Waylith.EngineWindow.IsFocused;
+		if (focused != _focused)
+		{
+			_focused = focused;
+			io.AddFocusEvent(focused);
+			if (!focused)
+			{
+				Array.Clear(_down);
+				_ctrl = _shift = _alt = _super = false;
+			}
+		}
+
 		var mouse = InputState.MousePosition;
 		io.AddMousePosEvent(mouse.X, mouse.Y);
 		io.AddMouseButtonEvent(0, InputState.IsMouseButtonDown(MouseButton.Left));
@@ -190,6 +205,7 @@ public static class M3Host
 		}
 
 		_hooked = true;
+		ClipboardSource = M3Clipboard.Install();
 		InputState.TextInput += c =>
 		{
 			lock (_typed)
