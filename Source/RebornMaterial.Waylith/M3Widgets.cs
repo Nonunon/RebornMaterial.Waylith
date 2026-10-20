@@ -476,7 +476,7 @@ public static partial class M3Widgets
 
 	private static readonly Dictionary<uint, float> _holdProgress = [];
 
-	// Fills while held and returns true once it's full, so a risky action can't fire from a stray click.
+	// Fills while held and fires once full, so a stray click can't trigger it.
 	public static bool HoldButton(string id, string label, float seconds = 1f, M3ButtonStyle style = M3ButtonStyle.Danger, FontAwesomeIcon icon = FontAwesomeIcon.None, float? width = null, bool enabled = true, string? tooltip = null)
 	{
 		_ = Button(id, label, style, icon, width, enabled, tooltip ?? "Hold to confirm");
@@ -833,7 +833,7 @@ public static partial class M3Widgets
 
 	public static float SegmentedHeight => M3.FitText(32f, 6f);
 
-	// Measure with the same label font the buttons will use, or a smaller font gets the width of the body one.
+	// Measure with the buttons' label font, or a smaller font gets the body font's width.
 	public static float SegmentedWidth(ReadOnlySpan<M3Segment> segments, M3Font? labelFont = null)
 	{
 		var scale = M3.Scale;
@@ -1392,7 +1392,7 @@ public static partial class M3Widgets
 		Spinner(drawList, center, radius, s.Primary, stroke);
 	}
 
-	// The indeterminate arc of CircularProgress, drawn without taking up a layout slot.
+	// CircularProgress's indeterminate arc, without taking a layout slot.
 	public static void Spinner(ImDrawListPtr drawList, float2 center, float radius, float4 color, float stroke)
 	{
 		const float Cycle = 1.333f;
@@ -1458,7 +1458,7 @@ public static partial class M3Widgets
 			changed = ImGui.SliderFloat(id, ref value, min, max, "%.2f", flags);
 		}
 
-		// ImGui keeps a logarithmic slider clear of zero by this much, which depends on the format's decimals.
+		// How far ImGui keeps a logarithmic slider from zero, set by the format's decimals.
 		DrawSliderVisual(value, min, max, displayValue, M3.Scheme, scale, editing, logarithmic ? 0.01f : 0f, enabled);
 		return changed;
 	}
@@ -1781,7 +1781,7 @@ public static partial class M3Widgets
 		return changed;
 	}
 
-	// For code that only knows the enum's type at run time, such as a settings page built by reflection.
+	// For enums only known at run time, such as a settings page built by reflection.
 	public static bool RowCombo(string label, Type enumType, ref Enum value, string? supporting = null, Func<Enum, string>? itemLabel = null, bool search = false, bool enabled = true)
 	{
 		var values = EnumValuesOf(enumType);
@@ -1849,7 +1849,7 @@ public static partial class M3Widgets
 
 	#region Text fields
 
-	// Busy swaps the search icon for a spinner, for while the results it found are on screen.
+	// Busy swaps the search icon for a spinner.
 	public static bool SearchField(string id, string hint, ref string text, float width, int maxLength = 128, bool busy = false, bool enabled = true)
 	{
 		var s = M3.Scheme;
@@ -2064,7 +2064,7 @@ public static partial class M3Widgets
 		return M3Draw.MeasureIcon(icon).X;
 	}
 
-	// A small icon that explains something on hover. It's as tall as a frame, to line up with controls and frame-aligned text.
+	// A small hover-to-explain icon, frame height so it lines up with controls.
 	public static void HelpMarker(string text, FontAwesomeIcon icon = FontAwesomeIcon.InfoCircle, float4? color = null)
 	{
 		var size = new float2(HelpMarkerWidth(icon), ImGui.GetFrameHeight());
@@ -2202,7 +2202,7 @@ public static partial class M3Widgets
 		return Combo(id, ref index, items.Count, i => items[i], width, emptyText, search, enabled, tooltip);
 	}
 
-	// Search adds a filter box to the menu. Only the rows in view are drawn, so a list of thousands stays cheap.
+	// Search adds a filter box. Only visible rows are drawn, so thousands of items stay cheap.
 	public static bool Combo(string id, ref int index, int count, Func<int, string> itemLabel, float width, string? emptyText = null, bool search = false, bool enabled = true, string? tooltip = null,
 		Func<int, string?>? itemTooltip = null, Func<int, bool>? itemEnabled = null, Func<int, bool>? itemVisible = null)
 	{
@@ -2217,7 +2217,7 @@ public static partial class M3Widgets
 			ImGui.OpenPopup(popupId);
 		}
 
-		// The menu fits its widest item. Measured once as it opens, since long lists make that slow to do every frame.
+		// The menu fits its widest item, measured once on open since long lists are slow to measure.
 		var popupWidth = MathF.Max(width, 160f * scale);
 		if (opening || ImGui.IsPopupOpen(popupId))
 		{
@@ -2357,7 +2357,7 @@ public static partial class M3Widgets
 		return true;
 	}
 
-	// For code that only knows the enum's type at run time, such as a settings page built by reflection.
+	// For enums only known at run time, such as a settings page built by reflection.
 	public static bool Combo(string id, Type enumType, ref Enum value, float width, Func<Enum, string>? itemLabel = null, bool search = false, bool enabled = true, string? tooltip = null)
 	{
 		var values = EnumValuesOf(enumType);
@@ -2448,7 +2448,7 @@ public static partial class M3Widgets
 		return values;
 	}
 
-	// The value's name with its words spaced out, so LowestHp reads "Lowest Hp" and Phase2 reads "Phase 2".
+	// Spaces out the value's name: LowestHp reads "Lowest Hp", Phase2 reads "Phase 2".
 	public static string EnumLabel(Enum value)
 	{
 		if (_enumLabels.TryGetValue(value, out var cached))
@@ -2494,7 +2494,7 @@ public static partial class M3Widgets
 		return MenuItemCore(id, label, selected, icon, enabled, shortcut, tooltip, texture, false);
 	}
 
-	// Fit keeps the row inside the menu and shortens a long label, for menus of a fixed width.
+	// Fit keeps the row inside a fixed-width menu, shortening a long label.
 	internal static bool MenuItemCore(string id, string label, bool selected, FontAwesomeIcon icon, bool enabled, string? shortcut, string? tooltip, IM3Texture? texture, bool fit,
 		bool submenu = false, bool open = false)
 	{
@@ -2579,7 +2579,7 @@ public static partial class M3Widgets
 
 	public static float ColorSwatchSize => 28f * M3.Scale;
 
-	// With a default colour, the picker gets a reset button. Alpha false hides the alpha bar and keeps the colour opaque.
+	// A default colour adds a reset button. Alpha false hides the alpha bar.
 	public static bool ColorSwatch(string id, ref float4 color, float4? defaultColor = null, bool alpha = true, bool enabled = true, string? tooltip = null)
 	{
 		var s = M3.Scheme;

@@ -1,6 +1,6 @@
 namespace RebornMaterial;
 
-// Draw children inside the node's using block while Open is true. The tree remembers which nodes are open.
+// Draw children inside the node's using block while Open is true. Open state is remembered.
 // The row stays the last item until the first child, so a right-click menu can follow it.
 public static class M3Tree
 {

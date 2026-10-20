@@ -6,7 +6,7 @@ public enum M3Density
 
 	Compact,
 
-	// Compact spacing, plus thin window edges and the tighter card, row and drawer padding from M3Style.Spacing.
+	// Compact, plus thin window edges and tighter card, row and drawer padding.
 	Tight,
 }
 
@@ -15,7 +15,7 @@ public static class M3Style
 	/// <summary>The density of the innermost <see cref="Push"/>. Shared components read it to pick their padding.</summary>
 	public static M3Density Density { get; private set; }
 
-	// Scaled padding for shared components, which pull in only inside a Tight window so the other windows keep their look.
+	// Padding that only tightens inside a Tight window.
 	public static float Spacing(float regular, float tight)
 	{
 		return (Density == M3Density.Tight ? tight : regular) * M3.PaddingScale;

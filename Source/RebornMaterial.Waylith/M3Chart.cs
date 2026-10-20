@@ -2,12 +2,12 @@ namespace RebornMaterial;
 
 public readonly record struct M3ChartSeries(string Name, IReadOnlyList<float> Values);
 
-// Series take the palette's colours in order. There are eight, and they never repeat: fold extra series into an "Other" series.
+// Series take the palette's eight colours in order. Fold any extra series into an "Other" one.
 public static class M3Chart
 {
 	public const int MaxSeries = 8;
 
-	// Checked for colour-blind separation and contrast against this library's surfaces, from the window background up to standard containers.
+	// Checked for colour-blind separation and contrast against this library's surfaces.
 	public static readonly float4[] Palette =
 	[
 		M3ColorMath.FromRgb(0x3987E5),
@@ -25,7 +25,7 @@ public static class M3Chart
 		return Palette[index];
 	}
 
-	// Stacked puts each category's series on top of each other; otherwise they stand side by side. Values below zero draw as zero.
+	// Stacked piles each category's series up; otherwise they stand side by side. Negative values draw as zero.
 	public static void Bars(string id, IReadOnlyList<string> categories, IReadOnlyList<M3ChartSeries> series, float2 size, bool stacked = true,
 		Func<float, string>? format = null, string? yTitle = null, string? xTitle = null)
 	{

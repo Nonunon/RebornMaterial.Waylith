@@ -1,7 +1,6 @@
 namespace RebornMaterial;
 
-// A tag on a line of text. It reserves the frame height and centres itself in it, to line up with
-// frame-aligned text and framed widgets.
+// A tag on a line of text, centred in the frame height so it lines up with framed widgets.
 public static class M3Badge
 {
 	public static void Draw(string label, float4 accent, string? tooltip = null)

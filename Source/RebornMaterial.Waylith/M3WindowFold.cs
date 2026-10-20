@@ -59,7 +59,7 @@ public sealed class M3WindowFold
 		_minimized = false;
 	}
 
-	// Folds the window from code. Before the window has drawn once, it folds on its first frame instead.
+	// Folds from code. Before the first draw, it folds on the first frame.
 	public void Minimize()
 	{
 		if (_minimized)

@@ -74,7 +74,7 @@ public static class M3Text
 		};
 	}
 
-	// Applies a style to any ImGui text drawn inside it, such as BulletText or table cells.
+	// Styles any ImGui text drawn inside it, such as BulletText or table cells.
 	public static Scope Push(M3TextStyle style)
 	{
 		var font = FontOf(style);

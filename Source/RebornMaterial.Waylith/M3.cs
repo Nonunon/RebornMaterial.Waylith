@@ -6,7 +6,7 @@ public static class M3
 
 	private static bool _initialized;
 
-	// Remember the configured color, not the fallback, or an unusable color would rebuild the theme on every access.
+	// Tracks the configured seed, not the fallback, so a rejected colour isn't rebuilt on every access.
 	private static float4 _configuredSeed = DefaultSeed;
 	private static M3Scheme _scheme = M3Scheme.FromSeed(DefaultSeed);
 
@@ -16,10 +16,10 @@ public static class M3
 
 	private static float _paddingScale = 1f;
 
-	/// <summary>Where the accent color and the text, element and padding sizes are read from.</summary>
+	/// <summary>Where the accent colour and the size settings are read from.</summary>
 	public static IM3Settings Settings { get; set; } = new M3Settings();
 
-	/// <summary>Element size at a setting of 100%. Below 1 makes every component more compact than the Material spec.</summary>
+	/// <summary>Element size at 100%. Below 1 is more compact than the Material spec.</summary>
 	public static float ElementBaseline { get; set; } = 1f;
 
 	public static bool IsInitialized => _initialized;
@@ -52,11 +52,11 @@ public static class M3
 
 	public static float Scale => Verse.Prefs.UIScale * _elementScale * _windowScale;
 
-	/// <summary>Scale for padding and spacing. Follows the padding setting on top of <see cref="Scale"/>, so the space can shrink or grow without the controls changing size.</summary>
+	/// <summary><see cref="Scale"/> times the padding setting, so spacing can change without resizing controls.</summary>
 	public static float PaddingScale => Scale * _paddingScale;
 
 	/// <summary>Call once per frame, before any window draws.</summary>
-	// Keeps the old sizes while a control is held, so the size sliders don't resize under the mouse.
+	// Sizes hold still while a control is held, so a size slider doesn't move under the mouse.
 	public static void BeginFrame()
 	{
 		if (!ImGui.IsAnyItemActive())
@@ -90,7 +90,7 @@ public static class M3
 			{
 				_configuredSeed = seed;
 
-				// Grey or black colors make an unusable theme, so fall back to the default.
+				// Grey or black seeds make an unusable theme.
 				M3ColorMath.ToLch(seed, out var lightness, out var chroma, out _);
 				_scheme = M3Scheme.FromSeed(lightness < 5f || chroma < 2f ? DefaultSeed : seed);
 			}
@@ -165,7 +165,7 @@ public static class M3
 		return ImGui.GetColorU32(color with { W = alpha });
 	}
 
-	// Turns a colour's hue up to 15 degrees towards the accent, so a fixed colour sits better beside the scheme.
+	// Turns a colour's hue up to 15 degrees toward the accent, so it sits better in the scheme.
 	public static float4 Harmonize(float4 color)
 	{
 		M3ColorMath.ToLch(color, out var lightness, out var chroma, out var hue);

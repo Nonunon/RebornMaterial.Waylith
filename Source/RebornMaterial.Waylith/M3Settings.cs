@@ -1,9 +1,9 @@
 namespace RebornMaterial;
 
-/// <summary>A plugin's own configuration can implement this directly, so the theme follows its saved settings.</summary>
+/// <summary>Implement on a mod's settings so the theme follows them.</summary>
 public interface IM3Settings
 {
-	/// <summary>The seed the whole color scheme is derived from. Grey or black falls back to <see cref="M3.DefaultSeed"/>.</summary>
+	/// <summary>Seed colour for the whole scheme. Grey or black falls back to <see cref="M3.DefaultSeed"/>.</summary>
 	float4 UiAccentColor { get; set; }
 
 	/// <summary>Text size multiplier, clamped to 0.5 - 3.</summary>
@@ -12,7 +12,7 @@ public interface IM3Settings
 	/// <summary>Element size multiplier, clamped to 0.5 - 2.5.</summary>
 	float UiElementScale { get; set; }
 
-	/// <summary>Padding and spacing multiplier, on top of the element size, clamped to 0 - 3. Settings that don't store it stay at 1.</summary>
+	/// <summary>Padding and spacing multiplier on top of the element size, clamped to 0 - 3. Defaults to 1.</summary>
 	float UiPaddingScale
 	{
 		get => 1f;

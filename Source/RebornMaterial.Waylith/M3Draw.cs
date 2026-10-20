@@ -131,7 +131,7 @@ public static class M3Draw
 		drawList.AddText(M3Icons.Font, ImGui.GetFontSize() * scale, position, M3.U32(color), text);
 	}
 
-	// Outlines the last item while the keyboard or a gamepad has it focused. Mouse users never see it.
+	// Outlines the last item while it has keyboard or gamepad focus.
 	public static void FocusRing(float2 min, float2 max, float rounding)
 	{
 		if (!ImGui.IsItemFocused() || !ImGui.GetIO().NavVisible)

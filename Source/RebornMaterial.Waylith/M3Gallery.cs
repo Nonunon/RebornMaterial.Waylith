@@ -1,6 +1,6 @@
 namespace RebornMaterial;
 
-// A showcase of every component, for a plugin's debug tab. Call Draw inside any window.
+// A showcase of every component, for a debug tab. Call Draw inside any window.
 public static class M3Gallery
 {
 	private const int DefaultScaleIndex = 1;
@@ -115,7 +115,6 @@ public static class M3Gallery
 
 	private static readonly float[] _actionIconSizes = [24f, 32f, 48f, 64f];
 
-	// Job icons, which every client has.
 	private static readonly string[] _demoDefs = ["Silver", "Steel", "Plasteel", "Gold", "Uranium", "ComponentIndustrial", "MedicineIndustrial", "MealSimple", "WoodLog", "Jade", "Cloth", "Beer"];
 	private static IM3Texture?[]? _demoIconCache;
 
@@ -279,7 +278,7 @@ public static class M3Gallery
 		var scale = M3.Scale;
 
 		using var card = M3Card.Begin("gallery_controls", "Gallery controls", FontAwesomeIcon.SlidersH, style: M3CardStyle.Outlined,
-			subtitle: "Headings in this colour mark components added ahead of any caller in the plugin.");
+			subtitle: "Headings in this colour mark components added ahead of any caller in the mod.");
 
 		var segmentsWidth = M3Widgets.SegmentedWidth(_scaleSegments);
 		var scaleRow = M3SettingRow.Begin("Preview scale", "Scales every metric and font below, without touching the text size setting.",
@@ -477,7 +476,7 @@ public static class M3Gallery
 			float size;
 			using (ImRaii.PushFont(font))
 			{
-				ImGui.Text($"{name} — The quick brown fox");
+				ImGui.Text($"{name}: The quick brown fox");
 				size = ImGui.GetFontSize();
 			}
 
@@ -1228,7 +1227,7 @@ public static class M3Gallery
 		using (var card = M3Card.Begin("gallery_empty_state", null, style: M3CardStyle.Outlined))
 		{
 			if (M3Widgets.EmptyState("##gallery_empty", "No rotations loaded",
-				"Download the rotations for your job, or point the plugin at a local folder.", FontAwesomeIcon.Inbox, "Download"))
+				"Download the rotations for your job, or point the mod at a local folder.", FontAwesomeIcon.Inbox, "Download"))
 			{
 				Pressed("Empty state action");
 			}
@@ -1236,7 +1235,7 @@ public static class M3Gallery
 
 		Heading("Tooltips");
 		_ = M3Widgets.Button("##tooltip_button", "Hover for a tooltip", M3ButtonStyle.Outlined, FontAwesomeIcon.InfoCircle);
-		M3Tooltip.Hovered("Tooltips go through M3Tooltip, which a plugin can route to its own handler.");
+		M3Tooltip.Hovered("Tooltips go through M3Tooltip, which a mod can route to its own handler.");
 	}
 
 	private static void DrawDialogs()
@@ -1473,8 +1472,8 @@ public static class M3Gallery
 			new("actions", "Actions", FontAwesomeIcon.Bolt, _navSelected == "actions", Section: "Combat"),
 			new("jobs", "Jobs", FontAwesomeIcon.User, _navSelected == "jobs", "A texture can stand in for the icon", Section: "Combat",
 				Texture: _demoIcons[0]),
-			new("settings", "Settings", FontAwesomeIcon.Cog, _navSelected == "settings", Section: "Plugin"),
-			new("debug", "Debug", FontAwesomeIcon.Bug, _navSelected == "debug", Accent: s.Tertiary, Section: "Plugin"),
+			new("settings", "Settings", FontAwesomeIcon.Cog, _navSelected == "settings", Section: "Mod"),
+			new("debug", "Debug", FontAwesomeIcon.Bug, _navSelected == "debug", Accent: s.Tertiary, Section: "Mod"),
 		];
 
 		var height = 300f * scale;

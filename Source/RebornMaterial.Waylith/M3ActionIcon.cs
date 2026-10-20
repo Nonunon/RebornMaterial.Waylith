@@ -1,6 +1,6 @@
 namespace RebornMaterial;
 
-// Recast state for the cooldown overlay, in seconds. Elapsed counts up towards RecastTime, the time for one charge.
+// Cooldown overlay state, in seconds. Elapsed counts up to RecastTime, the time for one charge.
 public readonly record struct M3Cooldown(bool IsCoolingDown, float RecastTime, float Elapsed, int CurrentCharges = 0, int MaxCharges = 0);
 
 public static class M3ActionIcon

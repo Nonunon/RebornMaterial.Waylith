@@ -418,7 +418,7 @@ public static class M3Navigation
 				M3Widgets.BadgeAt(new float2(labelPosition.X + labelSize.X + (4f * scale) + (badgeSize.X * 0.5f), labelPosition.Y + (badgeSize.Y * 0.5f)), tab.Badge);
 			}
 
-			// Kept relative to the start of the tabs, so the indicator doesn't trail behind while they scroll.
+			// Relative to the tabs' start, so the indicator doesn't lag while they scroll.
 			if (selected)
 			{
 				indicatorWidth = secondary ? tabWidth : MathF.Max(contentSpan, 24f * scale);

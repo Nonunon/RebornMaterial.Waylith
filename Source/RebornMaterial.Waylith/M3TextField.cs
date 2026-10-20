@@ -14,7 +14,6 @@ public static class M3TextField
 		var drawList = ImGui.GetWindowDrawList();
 		var hovered = ImGui.IsMouseHoveringRect(min, max) && ImGui.IsWindowHovered(ImGuiHoveredFlags.ChildWindows);
 
-		// The container goes down first so the input's text lands on top of it.
 		var fill = hovered ? M3.StateLayer(s.SurfaceContainerHighest, s.OnSurface, true, false) : s.SurfaceContainerHighest;
 		drawList.AddRectFilled(min, max, M3.U32(fill), M3.ShapeExtraSmall, ImDrawFlags.RoundCornersTop);
 

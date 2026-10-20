@@ -1,6 +1,6 @@
 namespace RebornMaterial;
 
-// Popup menus. Open one with Open and Begin, or on a right-click with BeginContext. Item closes every open menu when picked.
+// Popup menus: Open then Begin, or BeginContext on a right-click. Picking an Item closes every open menu.
 public static class M3Menu
 {
 	private const int StyleVars = 3;

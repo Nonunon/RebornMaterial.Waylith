@@ -5,7 +5,7 @@ public static class M3Tooltip
 	// In multiples of the font size.
 	private const float WrapEms = 28f;
 
-	/// <summary>Replaces the built-in tooltip for every component, e.g. to honour a plugin's own "show tooltips" setting.</summary>
+	/// <summary>Replaces the built-in tooltip for every component, e.g. to honour a "show tooltips" setting.</summary>
 	public static Action<string>? Handler { get; set; }
 
 	public static void Hovered(string? text)
