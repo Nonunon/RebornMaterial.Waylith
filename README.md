@@ -25,7 +25,8 @@ Every upstream file. Most only needed the type changes listed below the table.
 | `M3Fonts.cs` | Rewritten: the game's font at any size through `PushFont(font, size)` |
 | `M3Icons.cs` | New: the FontAwesome icons the library uses (codepoints match Dalamud's `FontAwesomeIcon`), loaded from an embedded Font Awesome Free Solid 7.1 font |
 | `M3Input.cs` | New: `ref string` text input on top of Brutal's `ImInputString` |
-| `M3Host.cs` | New: passes the mouse, keys, modifiers and typed characters from Waylith to ImGui, once per frame |
+| `M3Host.cs` | New: passes the mouse, keys, modifiers, typed characters and window focus from Waylith to ImGui, once per frame |
+| `M3Clipboard.cs` | New: clipboard through Waylith, installed only when ImGui has none of its own (the Windows `imgui.dll` does) |
 | `M3TypingGuard.cs` | New: stops RimWorld's hotkeys and camera keys while an ImGui text field has focus |
 | `M3Texture.cs`, `M3GameTexture.cs` | New: `IM3Texture` stands in for Dalamud's texture wrap; `M3GameTexture` wraps any RimWorld `Texture2D` or `RenderTexture` |
 | `M3WindowState.cs` | New: position, size and flags for the window fold |
