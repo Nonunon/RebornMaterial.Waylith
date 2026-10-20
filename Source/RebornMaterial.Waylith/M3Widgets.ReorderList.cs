@@ -1,4 +1,4 @@
-using Dalamud.Interface.Utility.Raii;
+using Brutal.ImGuiApi.Internal;
 
 namespace RebornMaterial;
 
@@ -31,7 +31,7 @@ public static partial class M3Widgets
 		for (var i = 0; i < items.Count; i++)
 		{
 			var item = items[i];
-			var pressed = ImGui.InvisibleButton($"##row{i}", new Vector2(width, height), (ImGuiButtonFlags)ImGuiButtonFlagsPrivate.PressedOnClick) && enabled;
+			var pressed = ImGui.InvisibleButton($"##row{i}", new float2(width, height), (ImGuiButtonFlags)ImGuiButtonFlagsPrivate.PressedOnClick) && enabled;
 			var mouseOver = ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenBlockedByActiveItem);
 			var hovered = enabled && mouseOver && !dragging;
 			var focused = ImGui.IsItemFocused();
@@ -52,7 +52,7 @@ public static partial class M3Widgets
 				if (target != i && target >= 0 && target < items.Count)
 				{
 					Move(items, i, target, ref selected);
-					ImGuiP.SetFocusID(ImGui.GetID($"##row{target}"), ImGuiP.GetCurrentWindow());
+					ImGui.Internal.SetFocusID(ImGui.GetID($"##row{target}"), ImGui.Internal.GetCurrentWindow());
 					moved = true;
 				}
 			}
@@ -75,14 +75,14 @@ public static partial class M3Widgets
 
 			var dim = enabled ? 1f : M3.DisabledContent;
 			var gripX = min.X + (10f * scale);
-			M3Draw.IconCentered(drawList, FontAwesomeIcon.GripVertical, new Vector2(gripX, min.Y), new Vector2(gripX + gripWidth, max.Y),
+			M3Draw.IconCentered(drawList, FontAwesomeIcon.GripVertical, new float2(gripX, min.Y), new float2(gripX + gripWidth, max.Y),
 				M3.Alpha(s.OnSurfaceVariant, (hovered || lifted ? 1f : 0.6f) * dim));
 
 			var textX = gripX + gripWidth + (12f * scale);
 			var text = M3Navigation.Truncate(label(item), MathF.Max(8f * scale, max.X - textX - (8f * scale)));
 			var textSize = ImGui.CalcTextSize(text);
 			var textColor = i == selected && !lifted ? s.OnSecondaryContainer : s.OnSurface;
-			drawList.AddText(new Vector2(textX, min.Y + ((height - textSize.Y) * 0.5f)), M3.U32(textColor, 0.95f * dim), text);
+			drawList.AddText(new float2(textX, min.Y + ((height - textSize.Y) * 0.5f)), M3.U32(textColor, 0.95f * dim), text);
 			M3Draw.FocusRing(min, max, M3.ShapeSmall);
 
 			if (mouseOver && !dragging && tooltip != null)
@@ -100,7 +100,7 @@ public static partial class M3Widgets
 			}
 			else if (dragging && enabled && items.Count > 0)
 			{
-				ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeNs);
+				ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeNS);
 				var target = Math.Clamp((int)MathF.Floor((ImGui.GetMousePos().Y - top) / (height + gap)), 0, items.Count - 1);
 				if (target != _reorderIndex && _reorderIndex < items.Count)
 				{

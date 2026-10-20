@@ -80,6 +80,18 @@ public static class ImRaii
 		return new EndDisposable(open, open, ImGui.EndPopup);
 	}
 
+	public static EndDisposable Group()
+	{
+		ImGui.BeginGroup();
+		return new EndDisposable(true, true, ImGui.EndGroup);
+	}
+
+	public static EndDisposable Table(string id, int columns, ImGuiTableFlags flags = ImGuiTableFlags.None, float2 outerSize = default, float innerWidth = 0f)
+	{
+		var open = ImGui.BeginTable(id, columns, flags, outerSize, innerWidth);
+		return new EndDisposable(open, open, ImGui.EndTable);
+	}
+
 	public static EndDisposable Child(string id, float2 size, bool border = false, ImGuiWindowFlags flags = ImGuiWindowFlags.None)
 	{
 		var open = ImGui.BeginChild(id, size, border ? ImGuiChildFlags.Borders : ImGuiChildFlags.None, flags);

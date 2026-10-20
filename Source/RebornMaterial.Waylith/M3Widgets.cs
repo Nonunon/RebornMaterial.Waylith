@@ -2691,6 +2691,8 @@ public static partial class M3Widgets
 		_holdProgress.Clear();
 		_enumLabels.Clear();
 		_enumValues.Clear();
+		ResetHotkeys();
+		ResetReorder();
 	}
 
 	#endregion

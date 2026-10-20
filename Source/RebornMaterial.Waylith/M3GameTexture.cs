@@ -35,6 +35,10 @@ public sealed class M3GameTexture(UnityEngine.Texture? texture) : IM3Texture
 		}
 	}
 
+	public int Width => Texture?.width ?? 0;
+
+	public int Height => Texture?.height ?? 0;
+
 	public static bool Supported => GetResolver() != null;
 
 	public static bool TryResolve(UnityEngine.Texture? texture, out ImTextureRef handle)

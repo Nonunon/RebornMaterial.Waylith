@@ -1,5 +1,3 @@
-using Dalamud.Interface.Utility.Raii;
-
 namespace RebornMaterial;
 
 // A showcase of every component, for a plugin's debug tab. Call Draw inside any window.
@@ -37,7 +35,7 @@ public static class M3Gallery
 	private static readonly FontAwesomeIcon[] _buttonIcons =
 		[FontAwesomeIcon.Check, FontAwesomeIcon.Pen, FontAwesomeIcon.Copy, FontAwesomeIcon.Undo, FontAwesomeIcon.TrashAlt];
 
-	private static readonly (string Name, Func<M3Scheme, Vector4> Pick)[] _roles =
+	private static readonly (string Name, Func<M3Scheme, float4> Pick)[] _roles =
 	[
 		("Primary", s => s.Primary),
 		("On primary", s => s.OnPrimary),
@@ -118,7 +116,10 @@ public static class M3Gallery
 	private static readonly float[] _actionIconSizes = [24f, 32f, 48f, 64f];
 
 	// Job icons, which every client has.
-	private static readonly uint[] _demoIcons = [62119, 62121, 62124, 62125, 62130, 62131, 62133, 62134, 62135, 62137, 62138, 62140];
+	private static readonly string[] _demoDefs = ["Silver", "Steel", "Plasteel", "Gold", "Uranium", "ComponentIndustrial", "MedicineIndustrial", "MealSimple", "WoodLog", "Jade", "Cloth", "Beer"];
+	private static IM3Texture?[]? _demoIconCache;
+
+	private static IM3Texture?[] _demoIcons => _demoIconCache ??= [.. _demoDefs.Select(name => (IM3Texture?)new M3GameTexture(Verse.DefDatabase<Verse.ThingDef>.GetNamedSilentFail(name)?.uiIcon))];
 
 	private static int _page;
 	private static int _scaleIndex = DefaultScaleIndex;
@@ -148,7 +149,7 @@ public static class M3Gallery
 	private static int _sliderInt = 3;
 	private static float _rowFloat = 1.5f;
 	private static int _rowInt = 12;
-	private static Vector4 _swatch = new(0.2f, 0.6f, 0.9f, 1f);
+	private static float4 _swatch = new(0.2f, 0.6f, 0.9f, 1f);
 
 	private static string _search = string.Empty;
 	private static string _name = string.Empty;
@@ -177,8 +178,8 @@ public static class M3Gallery
 	private static readonly bool[] _mixedChildren = [true, false, true];
 	private static readonly string[] _mixedNames = ["Miner", "Botanist", "Fisher"];
 	private static float _logSlider = 2f;
-	private static readonly Vector4 _rowColorDefault = new(0.85f, 0.45f, 0.2f, 1f);
-	private static Vector4 _rowColor = new(0.85f, 0.45f, 0.2f, 1f);
+	private static readonly float4 _rowColorDefault = new(0.85f, 0.45f, 0.2f, 1f);
+	private static float4 _rowColor = new(0.85f, 0.45f, 0.2f, 1f);
 	private static float _distance = 2.6f;
 	private static int _delay = 500;
 	private static string[]? _bigComboItems;
@@ -187,7 +188,7 @@ public static class M3Gallery
 	private static M3Density _rowEnum = M3Density.Compact;
 	private static int _ruleIndex;
 	private static int _rowComboIndex = 1;
-	private static M3Hotkey _hotkey = new(Dalamud.Game.ClientState.Keys.VirtualKey.G, Ctrl: true);
+	private static M3Hotkey _hotkey = new(Waylith.Input.Key.G, Ctrl: true);
 	private static M3Hotkey _holdKey = M3Hotkey.None;
 	private static string _rowText = "auto";
 	private static readonly List<string> _order = ["Opener", "Burst window", "Filler", "Defensives", "Movement"];
@@ -215,6 +216,19 @@ public static class M3Gallery
 		new("Misses", Enumerable.Range(0, 24).Select(hour => 6f + (4f * MathF.Cos(hour / 2.5f))).ToArray()),
 	];
 
+	public static int PageCount => _pages.Length;
+
+	public static int Page
+	{
+		get => _page;
+		set => _page = Math.Clamp(value, 0, _pages.Length - 1);
+	}
+
+	public static string PageName(int page)
+	{
+		return _pages[page].Label;
+	}
+
 	public static void Draw()
 	{
 		DrawControls();
@@ -229,7 +243,7 @@ public static class M3Gallery
 			_page = picked;
 		}
 
-		ImGui.Dummy(new Vector2(0f, M3.Space2));
+		ImGui.Dummy(new float2(0f, M3.Space2));
 
 		switch (_page)
 		{
@@ -269,7 +283,7 @@ public static class M3Gallery
 
 		var segmentsWidth = M3Widgets.SegmentedWidth(_scaleSegments);
 		var scaleRow = M3SettingRow.Begin("Preview scale", "Scales every metric and font below, without touching the text size setting.",
-			new Vector2(segmentsWidth, M3Widgets.SegmentedHeight));
+			new float2(segmentsWidth, M3Widgets.SegmentedHeight));
 		var chosen = M3Widgets.SegmentedButtons("##gallery_scale", _scaleSegments, _scaleIndex, segmentsWidth);
 		if (chosen >= 0)
 		{
@@ -280,7 +294,7 @@ public static class M3Gallery
 
 		var densityWidth = M3Widgets.SegmentedWidth(_densitySegments);
 		var densityRow = M3SettingRow.Begin("Preview density", "Restyles the pages below as M3Style.Push does for a window of that density.",
-			new Vector2(densityWidth, M3Widgets.SegmentedHeight));
+			new float2(densityWidth, M3Widgets.SegmentedHeight));
 		var density = M3Widgets.SegmentedButtons("##gallery_density", _densitySegments, _densityIndex, densityWidth);
 		if (density >= 0)
 		{
@@ -299,15 +313,15 @@ public static class M3Gallery
 		var swatch = 28f * scale;
 		var resetWidth = M3Widgets.ButtonWidth(FontAwesomeIcon.None, "Reset");
 		var seedRow = M3SettingRow.Begin("Accent seed", "The saved interface accent colour. The whole scheme is derived from it.",
-			new Vector2(swatch + M3.Space2 + resetWidth, M3Widgets.ButtonHeight));
-		ImGui.SetCursorScreenPos(seedRow.ControlPosition + new Vector2(0f, (M3Widgets.ButtonHeight - swatch) * 0.5f));
+			new float2(swatch + M3.Space2 + resetWidth, M3Widgets.ButtonHeight));
+		ImGui.SetCursorScreenPos(seedRow.ControlPosition + new float2(0f, (M3Widgets.ButtonHeight - swatch) * 0.5f));
 		var seed = M3.Settings.UiAccentColor;
 		if (M3Widgets.ColorSwatch("##gallery_seed", ref seed))
 		{
 			M3.Settings.UiAccentColor = seed;
 		}
 
-		ImGui.SetCursorScreenPos(seedRow.ControlPosition + new Vector2(swatch + M3.Space2, 0f));
+		ImGui.SetCursorScreenPos(seedRow.ControlPosition + new float2(swatch + M3.Space2, 0f));
 		if (M3Widgets.Button("##gallery_seed_reset", "Reset", M3ButtonStyle.Text))
 		{
 			M3.Settings.UiAccentColor = M3.DefaultSeed;
@@ -372,7 +386,7 @@ public static class M3Gallery
 	{
 		var s = M3.Scheme;
 		var scale = M3.Scale;
-		var size = new Vector2(150f, 48f) * scale;
+		var size = new float2(150f, 48f) * scale;
 		var flow = new M3Flow(M3.Space1, RowWidth);
 
 		foreach (var (name, pick) in _roles)
@@ -399,8 +413,8 @@ public static class M3Gallery
 			using (ImRaii.PushFont(M3.LabelSmall))
 			{
 				var line = ImGui.GetTextLineHeight();
-				drawList.AddText(min + (new Vector2(8f, 6f) * scale), M3.U32(content), name);
-				drawList.AddText(new Vector2(min.X + (8f * scale), max.Y - line - (6f * scale)), M3.U32(content, 0.75f), hex);
+				drawList.AddText(min + (new float2(8f, 6f) * scale), M3.U32(content), name);
+				drawList.AddText(new float2(min.X + (8f * scale), max.Y - line - (6f * scale)), M3.U32(content, 0.75f), hex);
 			}
 
 			if (hovered)
@@ -413,18 +427,18 @@ public static class M3Gallery
 	private static void DrawCustomColors()
 	{
 		var scale = M3.Scale;
-		var box = new Vector2(64f, 32f) * scale;
-		(string Name, Vector4 Color)[] colors =
+		var box = new float2(64f, 32f) * scale;
+		(string Name, float4 Color)[] colors =
 		[
-			("Available", new Vector4(0.30f, 0.85f, 0.35f, 1f)),
-			("Upcoming", new Vector4(0.95f, 0.65f, 0.15f, 1f)),
-			("Vulcan", new Vector4(0.45f, 0.35f, 0.75f, 1f)),
+			("Available", new float4(0.30f, 0.85f, 0.35f, 1f)),
+			("Upcoming", new float4(0.95f, 0.65f, 0.15f, 1f)),
+			("Vulcan", new float4(0.45f, 0.35f, 0.75f, 1f)),
 		];
 
 		foreach (var (name, color) in colors)
 		{
 			var roles = M3.CustomColor(color);
-			(string Label, Vector4 Fill)[] swatches =
+			(string Label, float4 Fill)[] swatches =
 			[
 				("Raw", color),
 				("Harmonized", M3.Harmonize(color)),
@@ -449,12 +463,12 @@ public static class M3Gallery
 
 	private static void DrawTypography()
 	{
-		(string Name, ImFontPtr Font)[] styles =
+		(string Name, M3Font Font)[] styles =
 		[
 			("Headline small", M3.HeadlineSmall),
 			("Title large", M3.TitleLarge),
 			("Title medium", M3.TitleMedium),
-			("Body", ImGui.GetFont()),
+			("Body", M3.Body),
 			("Label small", M3.LabelSmall),
 		];
 
@@ -463,7 +477,7 @@ public static class M3Gallery
 			float size;
 			using (ImRaii.PushFont(font))
 			{
-				ImGui.TextUnformatted($"{name} — The quick brown fox");
+				ImGui.Text($"{name} — The quick brown fox");
 				size = ImGui.GetFontSize();
 			}
 
@@ -485,7 +499,7 @@ public static class M3Gallery
 		];
 
 		var s = M3.Scheme;
-		var box = new Vector2(96f, 56f) * M3.Scale;
+		var box = new float2(96f, 56f) * M3.Scale;
 		var flow = new M3Flow(M3.Space3, RowWidth);
 		foreach (var (name, radius) in shapes)
 		{
@@ -502,7 +516,7 @@ public static class M3Gallery
 	private static void DrawElevation()
 	{
 		var s = M3.Scheme;
-		var box = new Vector2(96f, 56f) * M3.Scale;
+		var box = new float2(96f, 56f) * M3.Scale;
 		var flow = new M3Flow(M3.Space3 * 2f, RowWidth);
 		for (var level = 0; level <= 3; level++)
 		{
@@ -523,8 +537,8 @@ public static class M3Gallery
 	private static void DrawStateLayers()
 	{
 		var s = M3.Scheme;
-		var box = new Vector2(110f, 44f) * M3.Scale;
-		(string Name, Vector4 Container, Vector4 Content)[] states =
+		var box = new float2(110f, 44f) * M3.Scale;
+		(string Name, float4 Container, float4 Content)[] states =
 		[
 			("Enabled", s.SecondaryContainer, s.OnSecondaryContainer),
 			("Hovered", M3.StateLayer(s.SecondaryContainer, s.OnSecondaryContainer, true, false), s.OnSecondaryContainer),
@@ -548,7 +562,7 @@ public static class M3Gallery
 
 	private static void DrawSeverities()
 	{
-		var box = new Vector2(120f, 44f) * M3.Scale;
+		var box = new float2(120f, 44f) * M3.Scale;
 		var flow = new M3Flow(M3.Space2, RowWidth);
 		foreach (var severity in Enum.GetValues<M3Severity>())
 		{
@@ -564,8 +578,8 @@ public static class M3Gallery
 			var textSize = ImGui.CalcTextSize(name);
 			var radius = 4f * M3.Scale;
 			var left = min.X + ((box.X - textSize.X - (radius * 2f) - M3.Space2) * 0.5f);
-			drawList.AddCircleFilled(new Vector2(left + radius, min.Y + (box.Y * 0.5f)), radius, M3.U32(accent), 12);
-			drawList.AddText(new Vector2(left + (radius * 2f) + M3.Space2, min.Y + ((box.Y - textSize.Y) * 0.5f)), M3.U32(accent), name);
+			drawList.AddCircleFilled(new float2(left + radius, min.Y + (box.Y * 0.5f)), radius, M3.U32(accent), 12);
+			drawList.AddText(new float2(left + (radius * 2f) + M3.Space2, min.Y + ((box.Y - textSize.Y) * 0.5f)), M3.U32(accent), name);
 		}
 	}
 
@@ -587,7 +601,7 @@ public static class M3Gallery
 		foreach (var (name, duration) in tracks)
 		{
 			Caption(name);
-			ImGui.Dummy(new Vector2(width, 20f * scale));
+			ImGui.Dummy(new float2(width, 20f * scale));
 			var min = ImGui.GetItemRectMin();
 			var max = ImGui.GetItemRectMax();
 			var drawList = ImGui.GetWindowDrawList();
@@ -595,8 +609,8 @@ public static class M3Gallery
 			var y = (min.Y + max.Y) * 0.5f;
 			var t = M3Motion.Approach($"gallery_motion_{duration}", _motionOn ? 1f : 0f, duration);
 
-			drawList.AddLine(new Vector2(min.X + radius, y), new Vector2(max.X - radius, y), M3.U32(s.SurfaceContainerHighest), 4f * scale);
-			drawList.AddCircleFilled(new Vector2(float.Lerp(min.X + radius, max.X - radius, t), y), radius, M3.U32(s.Primary), 24);
+			drawList.AddLine(new float2(min.X + radius, y), new float2(max.X - radius, y), M3.U32(s.SurfaceContainerHighest), 4f * scale);
+			drawList.AddCircleFilled(new float2(float.Lerp(min.X + radius, max.X - radius, t), y), radius, M3.U32(s.Primary), 24);
 		}
 	}
 
@@ -604,7 +618,7 @@ public static class M3Gallery
 	{
 		var s = M3.Scheme;
 		var scale = M3.Scale;
-		var box = new Vector2(110f, 72f) * scale;
+		var box = new float2(110f, 72f) * scale;
 		var flow = new M3Flow(M3.Space3, RowWidth);
 
 		flow.Next(box.X);
@@ -705,8 +719,8 @@ public static class M3Gallery
 
 		Heading("Accent colours and game icons", isNew: true);
 		Caption("An accent recolours a button with the same roles the scheme uses. A texture takes the icon's place.");
-		var purple = new Vector4(0.45f, 0.35f, 0.75f, 1f);
-		var blue = new Vector4(0.25f, 0.45f, 0.70f, 1f);
+		var purple = new float4(0.45f, 0.35f, 0.75f, 1f);
+		var blue = new float4(0.25f, 0.45f, 0.70f, 1f);
 		flow = new M3Flow(M3.Space2, RowWidth);
 		foreach (var style in (ReadOnlySpan<M3ButtonStyle>)[M3ButtonStyle.Filled, M3ButtonStyle.Tonal, M3ButtonStyle.Outlined])
 		{
@@ -718,7 +732,7 @@ public static class M3Gallery
 		flow.Next(M3Widgets.ButtonWidth(FontAwesomeIcon.None, "Collectables"));
 		_ = M3Widgets.Button("##button_accent_blue", "Collectables", M3ButtonStyle.Tonal, accent: blue);
 
-		var jobIcon = M3ActionIcon.GameIcon(_demoIcons[2]);
+		var jobIcon = _demoIcons[2];
 		flow.Next(M3Widgets.ButtonWidth(FontAwesomeIcon.None, "With a game icon", jobIcon));
 		_ = M3Widgets.Button("##button_texture", "With a game icon", M3ButtonStyle.Outlined, texture: jobIcon);
 
@@ -780,7 +794,7 @@ public static class M3Gallery
 		Caption("The controls of a window without a title bar. Over a plain surface, pass a container fill.");
 		var barSize = M3Widgets.WindowActionsSize(_windowActions.Length);
 		var barOrigin = ImGui.GetCursorScreenPos();
-		var action = M3Widgets.WindowActions("##gallery_window_actions", barOrigin + new Vector2(barSize.X, 0f), _windowActions,
+		var action = M3Widgets.WindowActions("##gallery_window_actions", barOrigin + new float2(barSize.X, 0f), _windowActions,
 			out var closed, M3.Scheme.SurfaceContainerHigh);
 		if (action >= 0)
 		{
@@ -800,7 +814,7 @@ public static class M3Gallery
 		var folded = M3Motion.Approach("##gallery_window_fold_motion", _windowFolded ? 1f : 0f, M3Motion.EmphasisedDuration);
 		var openBarSize = M3Widgets.WindowActionsSize(_windowActions.Length, brand, 0f);
 		barOrigin = ImGui.GetCursorScreenPos();
-		_ = M3Widgets.WindowActions("##gallery_window_fold", barOrigin + new Vector2(openBarSize.X, 0f), _windowActions, brand, folded,
+		_ = M3Widgets.WindowActions("##gallery_window_fold", barOrigin + new float2(openBarSize.X, 0f), _windowActions, brand, folded,
 			out var toggled, out _, M3.Scheme.SurfaceContainerHigh);
 		if (toggled)
 		{
@@ -932,7 +946,7 @@ public static class M3Gallery
 		flow.Next(M3Widgets.ChipWidth("Tertiary", FontAwesomeIcon.Leaf));
 		_ = M3Widgets.Chip("##chip_accent", "Tertiary", true, FontAwesomeIcon.Leaf, "Chips take an accent", M3.Scheme.Tertiary);
 
-		var chipIcon = M3ActionIcon.GameIcon(_demoIcons[5]);
+		var chipIcon = _demoIcons[5];
 		flow.Next(M3Widgets.ChipWidth("Game icon", texture: chipIcon));
 		if (M3Widgets.Chip("##chip_texture", "Game icon", _filters[0], tooltip: "Chips take a texture, such as a game icon", texture: chipIcon))
 		{
@@ -1038,11 +1052,11 @@ public static class M3Gallery
 
 		Heading("Text fields", isNew: true);
 		_ = M3Widgets.TextField("##gallery_name", "Name", ref _name, width);
-		ImGui.Dummy(new Vector2(0f, M3.Space2));
+		ImGui.Dummy(new float2(0f, M3.Space2));
 
 		_ = M3Widgets.TextField("##gallery_target", "Target name", ref _target, width,
 			supporting: "Matches any enemy whose name contains this text.", leadingIcon: FontAwesomeIcon.Crosshairs);
-		ImGui.Dummy(new Vector2(0f, M3.Space2));
+		ImGui.Dummy(new float2(0f, M3.Space2));
 
 		var valid = uint.TryParse(_statusId, out _);
 		_ = M3Widgets.TextField("##gallery_status", "Status ID", ref _statusId, width,
@@ -1050,20 +1064,20 @@ public static class M3Gallery
 
 		Heading("Combo and menu items");
 		_ = M3Widgets.Combo("##gallery_combo", ref _comboIndex, _comboItems, width);
-		ImGui.Dummy(new Vector2(0f, M3.Space1));
+		ImGui.Dummy(new float2(0f, M3.Space1));
 		_ = M3Widgets.Combo("##gallery_combo_empty", ref _comboEmpty, _comboItems, width, "Nothing picked yet");
 
 		Heading("Search, enums and item tooltips", isNew: true);
 		_bigComboItems ??= Enumerable.Range(1, 5000).Select(i => $"Item {i:0000}").ToArray();
 		_ = M3Widgets.Combo("##gallery_combo_big", ref _bigComboIndex, _bigComboItems, width, search: true);
 		Caption("5,000 items with a search box. Enter picks the first match, and only the rows in view are drawn.");
-		ImGui.Dummy(new Vector2(0f, M3.Space1));
+		ImGui.Dummy(new float2(0f, M3.Space1));
 		_ = M3Widgets.Combo("##gallery_combo_enum", ref _enumChoice, width, itemTooltip: value => $"Picks {value}");
 		Caption("An enum combo. Labels come from the value names, or pass your own.");
-		ImGui.Dummy(new Vector2(0f, M3.Space1));
+		ImGui.Dummy(new float2(0f, M3.Space1));
 		_ = M3Widgets.Combo("##gallery_combo_rules", ref _ruleIndex, _comboItems.Length, i => _comboItems[i], width,
 			itemEnabled: i => i != 2, itemTooltip: i => i == 2 ? "Items can be disabled, and say why" : null);
-		ImGui.Dummy(new Vector2(0f, M3.Space1));
+		ImGui.Dummy(new float2(0f, M3.Space1));
 		_ = M3Widgets.Combo("##gallery_combo_off", ref _comboIndex, _comboItems, width, enabled: false, tooltip: "A disabled combo");
 		_ = M3Widgets.RowCombo("Row combo###gallery_row_combo", ref _rowComboIndex, _sizeOptions, "A combo in a setting row.");
 		_ = M3Widgets.RowCombo("Row enum combo###gallery_row_enum", ref _rowEnum, "Sized to its longest label.");
@@ -1083,7 +1097,7 @@ public static class M3Gallery
 		Heading("Text rows and help markers", isNew: true);
 		_ = M3Widgets.RowText("Lifestream command###gallery_row_text", ref _rowText, "auto", "A text field in a setting row.");
 		ImGui.AlignTextToFramePadding();
-		ImGui.TextUnformatted("Follow distance");
+		ImGui.Text("Follow distance");
 		ImGui.SameLine(0f, M3.Space1);
 		M3Widgets.HelpMarker("A help marker explains a control on hover. It's as tall as a frame, so it lines up with controls.");
 		ImGui.SameLine(0f, M3.Space3);
@@ -1116,17 +1130,17 @@ public static class M3Gallery
 				Pressed($"{severity} banner action");
 			}
 
-			ImGui.Dummy(new Vector2(0f, M3.Space1));
+			ImGui.Dummy(new float2(0f, M3.Space1));
 		}
 
 		Heading("Linear progress");
-		M3Widgets.LinearProgress(new Vector2(width, 6f * scale), _progress, 0.75f);
-		ImGui.Dummy(new Vector2(0f, M3.Space1));
+		M3Widgets.LinearProgress(new float2(width, 6f * scale), _progress, 0.75f);
+		ImGui.Dummy(new float2(0f, M3.Space1));
 		_ = M3Widgets.Slider("##gallery_progress", ref _progress, 0f, 1f, $"{_progress:P0}", 200f * scale);
 		Caption("The tick marks a threshold, here 75%.");
 
 		Heading("Indeterminate linear progress", isNew: true);
-		M3Widgets.LinearProgressIndeterminate(new Vector2(width, 4f * scale));
+		M3Widgets.LinearProgressIndeterminate(new float2(width, 4f * scale));
 
 		Heading("Circular progress", isNew: true);
 		var flow = new M3Flow(M3.Space3, RowWidth);
@@ -1139,8 +1153,8 @@ public static class M3Gallery
 		flow.Next(24f * scale);
 		M3Widgets.CircularProgress(24f * scale, null, 3f);
 		flow.Next(24f * scale);
-		ImGui.Dummy(new Vector2(24f * scale));
-		M3Widgets.Spinner(ImGui.GetWindowDrawList(), ImGui.GetItemRectMin() + new Vector2(12f * scale), 10.5f * scale, M3.Scheme.Tertiary, 3f * scale);
+		ImGui.Dummy(new float2(24f * scale));
+		M3Widgets.Spinner(ImGui.GetWindowDrawList(), ImGui.GetItemRectMin() + new float2(12f * scale), 10.5f * scale, M3.Scheme.Tertiary, 3f * scale);
 		Caption("Determinate ones follow the slider above. The last is a bare Spinner, which draws anywhere in any colour.");
 
 		Heading("Badges", isNew: true);
@@ -1284,7 +1298,7 @@ public static class M3Gallery
 		}
 
 		Heading("Setting rows");
-		var plain = M3SettingRow.Begin("A row with no control", null, Vector2.Zero);
+		var plain = M3SettingRow.Begin("A row with no control", null, float2.Zero);
 		M3SettingRow.End(plain);
 
 		var withIcon = M3SettingRow.Begin("Leading icon and supporting text", "Supporting text wraps beneath the headline.",
@@ -1299,10 +1313,10 @@ public static class M3Gallery
 		M3SettingRow.End(disabled);
 
 		var struck = M3SettingRow.Begin("Struck-through row: hidden by a job filter, kept in place so the list does not reflow",
-			null, Vector2.Zero, strikeThrough: true);
+			null, float2.Zero, strikeThrough: true);
 		M3SettingRow.End(struck);
 
-		var tinted = M3SettingRow.Begin("Custom label colour", null, Vector2.Zero, s.Tertiary);
+		var tinted = M3SettingRow.Begin("Custom label colour", null, float2.Zero, s.Tertiary);
 		M3SettingRow.End(tinted);
 
 		if (M3SettingRow.NavigationRow("##gallery_nav_row", "Navigation row", "The whole row is one target.",
@@ -1458,13 +1472,13 @@ public static class M3Gallery
 			new("rotations", "Rotations", FontAwesomeIcon.Sync, _navSelected == "rotations", "Items take a tooltip", Badge: "2", Section: "Combat"),
 			new("actions", "Actions", FontAwesomeIcon.Bolt, _navSelected == "actions", Section: "Combat"),
 			new("jobs", "Jobs", FontAwesomeIcon.User, _navSelected == "jobs", "A texture can stand in for the icon", Section: "Combat",
-				Texture: M3ActionIcon.GameIcon(_demoIcons[0])),
+				Texture: _demoIcons[0]),
 			new("settings", "Settings", FontAwesomeIcon.Cog, _navSelected == "settings", Section: "Plugin"),
 			new("debug", "Debug", FontAwesomeIcon.Bug, _navSelected == "debug", Accent: s.Tertiary, Section: "Plugin"),
 		];
 
 		var height = 300f * scale;
-		using (var drawer = ImRaii.Child("##gallery_drawer", new Vector2(220f * scale, height), false))
+		using (var drawer = ImRaii.Child("##gallery_drawer", new float2(220f * scale, height), false))
 		{
 			if (drawer)
 			{
@@ -1474,7 +1488,7 @@ public static class M3Gallery
 
 		ImGui.SameLine(0f, M3.Space3);
 
-		using (var rail = ImRaii.Child("##gallery_rail", new Vector2(88f * scale, height), false))
+		using (var rail = ImRaii.Child("##gallery_rail", new float2(88f * scale, height), false))
 		{
 			if (rail)
 			{
@@ -1493,14 +1507,14 @@ public static class M3Gallery
 			_tabIcons = picked;
 		}
 
-		ImGui.Dummy(new Vector2(0f, M3.Space2));
+		ImGui.Dummy(new float2(0f, M3.Space2));
 		picked = M3Navigation.Tabs("##gallery_tabs_text", _demoTextTabs, _tabText, width: RowWidth);
 		if (picked >= 0)
 		{
 			_tabText = picked;
 		}
 
-		ImGui.Dummy(new Vector2(0f, M3.Space2));
+		ImGui.Dummy(new float2(0f, M3.Space2));
 		picked = M3Navigation.Tabs("##gallery_tabs_secondary", _demoSecondaryTabs, _tabSecondary, secondary: true, width: RowWidth);
 		if (picked >= 0)
 		{
@@ -1552,18 +1566,18 @@ public static class M3Gallery
 
 		Heading("Stacked bars", isNew: true);
 		Caption("Catches by size. Hover a column for every value in it.");
-		M3Chart.Bars("##gallery_chart_stacked", _sizeBuckets, _sizeSeries, new Vector2(width, 220f * scale), yTitle: "Catches", xTitle: "Size (ilms)");
+		M3Chart.Bars("##gallery_chart_stacked", _sizeBuckets, _sizeSeries, new float2(width, 220f * scale), yTitle: "Catches", xTitle: "Size (ilms)");
 
 		Heading("Grouped bars", isNew: true);
-		M3Chart.Bars("##gallery_chart_grouped", _sizeBuckets, _sizeSeries, new Vector2(width, 220f * scale), stacked: false, yTitle: "Catches");
+		M3Chart.Bars("##gallery_chart_grouped", _sizeBuckets, _sizeSeries, new float2(width, 220f * scale), stacked: false, yTitle: "Catches");
 
 		Heading("Lines", isNew: true);
 		Caption("The crosshair snaps to the nearest hour and lists both series.");
-		M3Chart.Lines("##gallery_chart_lines", _hours, _hourSeries, new Vector2(width, 200f * scale), value => value.ToString("0.0"));
+		M3Chart.Lines("##gallery_chart_lines", _hours, _hourSeries, new float2(width, 200f * scale), value => value.ToString("0.0"));
 
 		Heading("Single series", isNew: true);
 		Caption("One series needs no legend; the heading says what it is.");
-		M3Chart.Bars("##gallery_chart_single", _sizeBuckets, [_sizeSeries[0]], new Vector2(width, 160f * scale));
+		M3Chart.Bars("##gallery_chart_single", _sizeBuckets, [_sizeSeries[0]], new float2(width, 160f * scale));
 
 		Heading("Table view", isNew: true);
 		Caption("The same numbers as a table, so nothing depends on hovering.");
@@ -1584,7 +1598,7 @@ public static class M3Gallery
 	private static void Caption(string text)
 	{
 		using var color = ImRaii.PushColor(ImGuiCol.Text, M3.Alpha(M3.Scheme.OnSurfaceVariant, 0.9f));
-		ImGui.TextUnformatted(text);
+		ImGui.Text(text);
 	}
 
 	private static void Beside(string text, bool muted = true)
@@ -1599,7 +1613,7 @@ public static class M3Gallery
 		}
 		else
 		{
-			ImGui.TextUnformatted(text);
+			ImGui.Text(text);
 		}
 	}
 
@@ -1608,7 +1622,7 @@ public static class M3Gallery
 		M3Snackbar.Show($"{what} pressed", duration: 2f);
 	}
 
-	private static string Hex(Vector4 color)
+	private static string Hex(float4 color)
 	{
 		static int Channel(float value)
 		{

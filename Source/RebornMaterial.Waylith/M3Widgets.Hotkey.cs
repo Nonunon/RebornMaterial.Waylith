@@ -1,13 +1,12 @@
-using Dalamud.Game.ClientState.Keys;
-using Dalamud.Interface.Utility;
+using Waylith.Input;
 
 namespace RebornMaterial;
 
-public readonly record struct M3Hotkey(VirtualKey Key, bool Ctrl = false, bool Shift = false, bool Alt = false)
+public readonly record struct M3Hotkey(Key Key, bool Ctrl = false, bool Shift = false, bool Alt = false)
 {
-	public static readonly M3Hotkey None = new(VirtualKey.NO_KEY);
+	public static readonly M3Hotkey None = new(Key.None);
 
-	public bool IsEmpty => Key == VirtualKey.NO_KEY;
+	public bool IsEmpty => Key == Key.None;
 
 	public override string ToString()
 	{
@@ -17,7 +16,7 @@ public readonly record struct M3Hotkey(VirtualKey Key, bool Ctrl = false, bool S
 		}
 
 		var prefix = (Ctrl ? "Ctrl+" : string.Empty) + (Shift ? "Shift+" : string.Empty) + (Alt ? "Alt+" : string.Empty);
-		return prefix + Key.GetFancyName();
+		return prefix + M3Host.KeyName(Key);
 	}
 }
 
@@ -38,12 +37,12 @@ public static partial class M3Widgets
 		var listening = _listeningHotkey == key;
 		var clearWidth = hotkey.IsEmpty || listening ? 0f : height;
 
-		var clicked = ImGui.InvisibleButton(id, new Vector2(width - clearWidth, height)) && enabled;
+		var clicked = ImGui.InvisibleButton(id, new float2(width - clearWidth, height)) && enabled;
 		var mouseOver = ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenBlockedByActiveItem);
 		var hovered = enabled && mouseOver;
 		var held = enabled && ImGui.IsItemActive();
 		var min = ImGui.GetItemRectMin();
-		var max = min + new Vector2(width, height);
+		var max = min + new float2(width, height);
 		M3Draw.FocusRing(min, ImGui.GetItemRectMax(), M3.ShapeSmall);
 
 		if (clicked)
@@ -83,7 +82,7 @@ public static partial class M3Widgets
 
 		var iconSize = M3Draw.MeasureIcon(FontAwesomeIcon.Keyboard);
 		var textX = min.X + (12f * scale);
-		M3Draw.Icon(drawList, FontAwesomeIcon.Keyboard, new Vector2(textX, min.Y + ((height - iconSize.Y) * 0.5f)),
+		M3Draw.Icon(drawList, FontAwesomeIcon.Keyboard, new float2(textX, min.Y + ((height - iconSize.Y) * 0.5f)),
 			M3.Alpha(listening ? s.Primary : s.OnSurfaceVariant, dim));
 		textX += iconSize.X + (10f * scale);
 
@@ -93,12 +92,12 @@ public static partial class M3Widgets
 			: M3.Alpha(s.OnSurface, 0.95f * dim);
 		var display = M3Navigation.Truncate(text, MathF.Max(8f * scale, max.X - clearWidth - textX - (8f * scale)));
 		var textSize = ImGui.CalcTextSize(display);
-		drawList.AddText(new Vector2(textX, min.Y + ((height - textSize.Y) * 0.5f)), M3.U32(color), display);
+		drawList.AddText(new float2(textX, min.Y + ((height - textSize.Y) * 0.5f)), M3.U32(color), display);
 
 		if (clearWidth > 0f)
 		{
 			var diameter = height - (12f * scale);
-			ImGui.SetCursorScreenPos(new Vector2(max.X - clearWidth + ((clearWidth - diameter) * 0.5f), min.Y + ((height - diameter) * 0.5f)));
+			ImGui.SetCursorScreenPos(new float2(max.X - clearWidth + ((clearWidth - diameter) * 0.5f), min.Y + ((height - diameter) * 0.5f)));
 			if (IconButton($"{id}_clear", FontAwesomeIcon.Times, "Clear", diameter: diameter, enabled: enabled))
 			{
 				hotkey = M3Hotkey.None;
@@ -117,7 +116,7 @@ public static partial class M3Widgets
 		}
 
 		ImGui.SetCursorScreenPos(min);
-		ImGui.Dummy(new Vector2(width, height));
+		ImGui.Dummy(new float2(width, height));
 		return changed;
 	}
 
@@ -125,7 +124,7 @@ public static partial class M3Widgets
 	{
 		var (display, id) = SplitLabel(label);
 		var width = MathF.Min(200f * M3.Scale, M3SettingRow.MaxControlWidth() * 0.6f);
-		var row = M3SettingRow.Begin(display, supporting, new Vector2(width, HotkeyFieldHeight), disabled: !enabled);
+		var row = M3SettingRow.Begin(display, supporting, new float2(width, HotkeyFieldHeight), disabled: !enabled);
 		ImGui.SetCursorScreenPos(row.ControlPosition);
 		var changed = HotkeyField($"##{id}_hotkey", ref hotkey, width, modifiers, enabled);
 		M3SettingRow.End(row);
@@ -145,8 +144,8 @@ public static partial class M3Widgets
 				continue;
 			}
 
-			var virtualKey = ImGuiHelpers.ImGuiKeyToVirtualKey(candidate);
-			if (virtualKey == VirtualKey.NO_KEY)
+			var virtualKey = M3Host.ToGameKey(candidate);
+			if (virtualKey == Key.None)
 			{
 				continue;
 			}

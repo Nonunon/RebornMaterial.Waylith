@@ -1,5 +1,3 @@
-using Dalamud.Interface.Utility.Raii;
-
 namespace RebornMaterial;
 
 public static class M3Snackbar
@@ -43,7 +41,7 @@ public static class M3Snackbar
 	}
 
 	// Call this last in the host window's Draw so it shows on top.
-	public static void Draw(Vector2 areaMin, Vector2 areaMax)
+	public static void Draw(float2 areaMin, float2 areaMax)
 	{
 		if (_current == null)
 		{
@@ -100,11 +98,11 @@ public static class M3Snackbar
 
 		var width = MathF.Min(maxWidth, MathF.Max(280f * scale, padding + textSize.X + (16f * scale) + trailing));
 		var height = MathF.Max(48f * scale, textSize.Y + (28f * scale));
-		var min = new Vector2(areaMin.X + ((areaWidth - width) * 0.5f), areaMax.Y - margin - height);
-		var max = min + new Vector2(width, height);
+		var min = new float2(areaMin.X + ((areaWidth - width) * 0.5f), areaMax.Y - margin - height);
+		var max = min + new float2(width, height);
 
-		ImGui.SetCursorScreenPos(min - new Vector2(shadow, shadow));
-		using var child = ImRaii.Child("##m3_snackbar", new Vector2(width, height) + new Vector2(shadow * 2f, shadow * 2f), false,
+		ImGui.SetCursorScreenPos(min - new float2(shadow, shadow));
+		using var child = ImRaii.Child("##m3_snackbar", new float2(width, height) + new float2(shadow * 2f, shadow * 2f), false,
 			ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoNav);
 		if (!child)
 		{
@@ -118,14 +116,14 @@ public static class M3Snackbar
 
 		M3Draw.Elevation(drawList, min, max, M3.ShapeExtraSmall, 3);
 		drawList.AddRectFilled(min, max, M3.U32(s.InverseSurface), M3.ShapeExtraSmall);
-		_ = M3Draw.WrappedText(entry.Message, new Vector2(min.X + padding, min.Y + ((height - textSize.Y) * 0.5f)), textWrap, s.InverseOnSurface);
+		_ = M3Draw.WrappedText(entry.Message, new float2(min.X + padding, min.Y + ((height - textSize.Y) * 0.5f)), textWrap, s.InverseOnSurface);
 
 		var dismiss = false;
 		var cursorX = max.X - (4f * scale) - closeWidth;
 		if (hasAction)
 		{
 			cursorX -= actionWidth;
-			ImGui.SetCursorScreenPos(new Vector2(cursorX, min.Y + ((height - M3Widgets.ButtonHeight) * 0.5f)));
+			ImGui.SetCursorScreenPos(new float2(cursorX, min.Y + ((height - M3Widgets.ButtonHeight) * 0.5f)));
 			if (ActionButton(entry.ActionLabel!, actionWidth))
 			{
 				entry.OnAction?.Invoke();
@@ -135,7 +133,7 @@ public static class M3Snackbar
 			cursorX += actionWidth;
 		}
 
-		ImGui.SetCursorScreenPos(new Vector2(cursorX, min.Y + ((height - closeWidth) * 0.5f)));
+		ImGui.SetCursorScreenPos(new float2(cursorX, min.Y + ((height - closeWidth) * 0.5f)));
 		if (M3Widgets.IconButton("##m3_snackbar_close", FontAwesomeIcon.Times, null, tint: s.InverseOnSurface))
 		{
 			dismiss = true;
@@ -153,7 +151,7 @@ public static class M3Snackbar
 		var s = M3.Scheme;
 		var height = M3Widgets.ButtonHeight;
 
-		var pressed = ImGui.InvisibleButton("##m3_snackbar_action", new Vector2(width, height));
+		var pressed = ImGui.InvisibleButton("##m3_snackbar_action", new float2(width, height));
 		var hovered = ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenBlockedByActiveItem);
 		var held = ImGui.IsItemActive();
 		var min = ImGui.GetItemRectMin();

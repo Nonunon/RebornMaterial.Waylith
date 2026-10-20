@@ -1,5 +1,3 @@
-using Dalamud.Interface.Textures.TextureWraps;
-
 namespace RebornMaterial;
 
 // Draw children inside the node's using block while Open is true. The tree remembers which nodes are open.
@@ -14,7 +12,7 @@ public static class M3Tree
 
 	// A click on a branch also opens or closes it. With the keyboard, right opens and left closes.
 	public static Scope Node(string id, string label, bool selected = false, bool leaf = false, FontAwesomeIcon icon = FontAwesomeIcon.None,
-		IDalamudTextureWrap? texture = null, Vector4? color = null, bool defaultOpen = false, string? tooltip = null, string? trailing = null)
+		IM3Texture? texture = null, float4? color = null, bool defaultOpen = false, string? tooltip = null, string? trailing = null)
 	{
 		var s = M3.Scheme;
 		var scale = M3.Scale;
@@ -27,7 +25,7 @@ public static class M3Tree
 			_open[key] = open;
 		}
 
-		var clicked = ImGui.InvisibleButton(id, new Vector2(width, height));
+		var clicked = ImGui.InvisibleButton(id, new float2(width, height));
 		var hovered = ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenBlockedByActiveItem);
 		var held = ImGui.IsItemActive();
 		var doubleClicked = hovered && ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left);
@@ -63,7 +61,7 @@ public static class M3Tree
 		}
 
 		var content = selected ? s.OnSecondaryContainer : s.OnSurfaceVariant;
-		var chevronCenter = new Vector2(min.X + (ChevronSlot * 0.5f) + (2f * scale), min.Y + (height * 0.5f));
+		var chevronCenter = new float2(min.X + (ChevronSlot * 0.5f) + (2f * scale), min.Y + (height * 0.5f));
 		if (!leaf)
 		{
 			var turn = M3Motion.Approach($"{id}_chevron", open ? 1f : 0f, M3Motion.FastDuration);
@@ -72,27 +70,27 @@ public static class M3Tree
 
 		var x = min.X + ChevronSlot + (6f * scale);
 		var iconSlot = MathF.Max(18f * scale, ImGui.GetTextLineHeight());
-		if (texture != null && M3Draw.Texture(drawList, texture, new Vector2(x, min.Y + ((height - iconSlot) * 0.5f)), iconSlot))
+		if (texture != null && M3Draw.Texture(drawList, texture, new float2(x, min.Y + ((height - iconSlot) * 0.5f)), iconSlot))
 		{
 			x += iconSlot + (8f * scale);
 		}
 		else if (icon != FontAwesomeIcon.None)
 		{
 			var iconSize = M3Draw.MeasureIcon(icon);
-			M3Draw.Icon(drawList, icon, new Vector2(x, min.Y + ((height - iconSize.Y) * 0.5f)), color ?? (selected ? s.OnSecondaryContainer : s.Primary));
+			M3Draw.Icon(drawList, icon, new float2(x, min.Y + ((height - iconSize.Y) * 0.5f)), color ?? (selected ? s.OnSecondaryContainer : s.Primary));
 			x += iconSize.X + (8f * scale);
 		}
 
-		var trailingSize = string.IsNullOrEmpty(trailing) ? Vector2.Zero : ImGui.CalcTextSize(trailing);
+		var trailingSize = string.IsNullOrEmpty(trailing) ? float2.Zero : ImGui.CalcTextSize(trailing);
 		var room = max.X - x - (8f * scale) - (trailingSize.X > 0f ? trailingSize.X + (12f * scale) : 0f);
 		var text = M3Navigation.Truncate(label, MathF.Max(8f * scale, room));
 		var textSize = ImGui.CalcTextSize(text);
-		drawList.AddText(new Vector2(x, min.Y + ((height - textSize.Y) * 0.5f)),
+		drawList.AddText(new float2(x, min.Y + ((height - textSize.Y) * 0.5f)),
 			M3.U32(color ?? (selected ? s.OnSecondaryContainer : s.OnSurface), 0.95f), text);
 
 		if (trailingSize.X > 0f)
 		{
-			drawList.AddText(new Vector2(max.X - (8f * scale) - trailingSize.X, min.Y + ((height - trailingSize.Y) * 0.5f)),
+			drawList.AddText(new float2(max.X - (8f * scale) - trailingSize.X, min.Y + ((height - trailingSize.Y) * 0.5f)),
 				M3.U32(s.OnSurfaceVariant, 0.85f), trailing);
 		}
 
@@ -129,15 +127,15 @@ public static class M3Tree
 		_open.Clear();
 	}
 
-	private static void DrawChevron(ImDrawListPtr drawList, Vector2 center, float turn, Vector4 color)
+	private static void DrawChevron(ImDrawListPtr drawList, float2 center, float turn, float4 color)
 	{
 		var scale = M3.Scale;
 		var arm = 3.5f * scale;
 		var (sin, cos) = MathF.SinCos(turn * MathF.PI * 0.5f);
 
-		Vector2 Rotate(float px, float py)
+		float2 Rotate(float px, float py)
 		{
-			return center + new Vector2((px * cos) - (py * sin), (px * sin) + (py * cos));
+			return center + new float2((px * cos) - (py * sin), (px * sin) + (py * cos));
 		}
 
 		var tip = Rotate(arm * 0.6f, 0f);
@@ -169,7 +167,7 @@ public static class M3Tree
 				var bottom = ImGui.GetCursorScreenPos().Y - (4f * M3.Scale);
 				if (bottom > guideTop)
 				{
-					ImGui.GetWindowDrawList().AddLine(new Vector2(guideX, guideTop), new Vector2(guideX, bottom),
+					ImGui.GetWindowDrawList().AddLine(new float2(guideX, guideTop), new float2(guideX, bottom),
 						M3.U32(M3.Scheme.OutlineVariant, 0.6f), 1f * M3.Scale);
 				}
 			}

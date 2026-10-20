@@ -39,7 +39,14 @@ public static class M3
 	/// <summary>Clears every cached animation and layout.</summary>
 	public static void Dispose()
 	{
+		M3Snackbar.Clear();
 		M3Motion.Reset();
+		M3CardHost.Reset();
+		M3Widgets.Reset();
+		M3Menu.Reset();
+		M3Tree.Reset();
+		M3Navigation.Reset();
+		M3Tooltip.Handler = null;
 		_initialized = false;
 	}
 

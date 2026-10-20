@@ -1,5 +1,3 @@
-using Dalamud.Interface.Utility.Raii;
-
 namespace RebornMaterial;
 
 public readonly record struct M3DialogAction(
@@ -25,10 +23,10 @@ public static class M3Dialog
 		var s = M3.Scheme;
 		var scale = M3.Scale;
 
-		ImGui.SetNextWindowSizeConstraints(new Vector2(width * scale, 0f), new Vector2(MathF.Max(width, 560f) * scale, 720f * scale));
+		ImGui.SetNextWindowSizeConstraints(new float2(width * scale, 0f), new float2(MathF.Max(width, 560f) * scale, 720f * scale));
 
 		bool open;
-		using (ImRaii.PushStyle(ImGuiStyleVar.WindowPadding, new Vector2(24f, 24f) * scale)
+		using (ImRaii.PushStyle(ImGuiStyleVar.WindowPadding, new float2(24f, 24f) * scale)
 			.Push(ImGuiStyleVar.WindowRounding, M3.ShapeExtraLarge))
 		{
 			open = ImGui.BeginPopupModal(id, Flags);
@@ -51,9 +49,9 @@ public static class M3Dialog
 		{
 			var iconSize = M3Draw.MeasureIcon(icon);
 			var origin = ImGui.GetCursorScreenPos();
-			ImGui.Dummy(new Vector2(contentWidth, iconSize.Y));
-			M3Draw.Icon(ImGui.GetWindowDrawList(), icon, new Vector2(origin.X + ((contentWidth - iconSize.X) * 0.5f), origin.Y), s.Secondary);
-			ImGui.Dummy(new Vector2(0f, 8f * scale));
+			ImGui.Dummy(new float2(contentWidth, iconSize.Y));
+			M3Draw.Icon(ImGui.GetWindowDrawList(), icon, new float2(origin.X + ((contentWidth - iconSize.X) * 0.5f), origin.Y), s.Secondary);
+			ImGui.Dummy(new float2(0f, 8f * scale));
 		}
 
 		using (ImRaii.PushFont(M3.HeadlineSmall))
@@ -62,22 +60,22 @@ public static class M3Dialog
 			if (centred && headlineWidth <= contentWidth)
 			{
 				ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ((contentWidth - headlineWidth) * 0.5f));
-				ImGui.TextUnformatted(headline);
+				ImGui.Text(headline);
 			}
 			else
 			{
-				ImGui.TextWrapped(headline);
+				ImGui.TextWrapped(headline.Replace("%", "%%"));
 			}
 		}
 
 		if (!string.IsNullOrEmpty(supporting))
 		{
-			ImGui.Dummy(new Vector2(0f, 8f * scale));
+			ImGui.Dummy(new float2(0f, 8f * scale));
 			using var color = ImRaii.PushColor(ImGuiCol.Text, s.OnSurfaceVariant);
-			ImGui.TextWrapped(supporting);
+			ImGui.TextWrapped(supporting.Replace("%", "%%"));
 		}
 
-		ImGui.Dummy(new Vector2(0f, 8f * scale));
+		ImGui.Dummy(new float2(0f, 8f * scale));
 		return new Scope(true);
 	}
 
@@ -92,7 +90,7 @@ public static class M3Dialog
 
 		total += gap * Math.Max(0, actions.Length - 1);
 
-		ImGui.Dummy(new Vector2(0f, M3.Space3));
+		ImGui.Dummy(new float2(0f, M3.Space3));
 		ImGui.SetCursorPosX(MathF.Max(ImGui.GetCursorPosX(), ImGui.GetCursorPosX() + ImGui.GetContentRegionAvail().X - total));
 
 		var pressed = -1;

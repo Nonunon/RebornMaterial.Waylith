@@ -86,6 +86,55 @@ public static class M3Host
 		ImGui.GetIO().AddMousePosEvent(-float.MaxValue, -float.MaxValue);
 	}
 
+	public static Key ToGameKey(ImGuiKey key)
+	{
+		foreach (var pair in Keys)
+		{
+			if (pair.ImKey == key)
+			{
+				return pair.Key;
+			}
+		}
+
+		return Key.None;
+	}
+
+	public static string KeyName(Key key)
+	{
+		var name = key.ToString();
+		if (name.StartsWith("Digit", StringComparison.Ordinal))
+		{
+			return name[5..];
+		}
+
+		if (name.StartsWith("Numpad", StringComparison.Ordinal))
+		{
+			return "Num " + name[6..];
+		}
+
+		return name switch
+		{
+			"Backquote" => "`",
+			"Quote" => "'",
+			"Semicolon" => ";",
+			"Comma" => ",",
+			"Period" => ".",
+			"Slash" => "/",
+			"Backslash" => "\\",
+			"LeftBracket" => "[",
+			"RightBracket" => "]",
+			"Minus" => "-",
+			"Equals" => "=",
+			"LeftArrow" => "Left",
+			"RightArrow" => "Right",
+			"UpArrow" => "Up",
+			"DownArrow" => "Down",
+			"PageUp" => "Page Up",
+			"PageDown" => "Page Down",
+			_ => name,
+		};
+	}
+
 	private static (Key Key, ImGuiKey ImKey)[] Keys
 	{
 		get

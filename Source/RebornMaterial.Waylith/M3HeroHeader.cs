@@ -1,5 +1,3 @@
-using Dalamud.Interface.Textures.TextureWraps;
-
 namespace RebornMaterial;
 
 // Holds its own stars: keep one per window and call Reset when it closes.
@@ -33,8 +31,8 @@ public sealed class M3HeroHeader
 	{
 		public Kind Kind;
 		public Tone Tone;
-		public Vector2 Position;
-		public Vector2 Velocity;
+		public float2 Position;
+		public float2 Velocity;
 		public float Life;
 		public float MaxLife;
 		public float Size;
@@ -43,7 +41,7 @@ public sealed class M3HeroHeader
 	}
 
 	private readonly List<Particle> _particles = [];
-	private readonly Vector3[] _staticStars = new Vector3[StaticStarCount];
+	private readonly float3[] _staticStars = new float3[StaticStarCount];
 	private readonly Random _random = new();
 	private float _spawnTimer;
 	private bool _warm;
@@ -55,7 +53,7 @@ public sealed class M3HeroHeader
 		var seeded = new Random(42);
 		for (var i = 0; i < _staticStars.Length; i++)
 		{
-			_staticStars[i] = new Vector3(seeded.NextSingle(), seeded.NextSingle(), 0.25f + (seeded.NextSingle() * 0.4f));
+			_staticStars[i] = new float3(seeded.NextSingle(), seeded.NextSingle(), 0.25f + (seeded.NextSingle() * 0.4f));
 		}
 	}
 
@@ -63,7 +61,7 @@ public sealed class M3HeroHeader
 
 	public float MaxImageHeight { get; set; } = 300f;
 
-	public Vector2 ImageFocus { get; set; } = new(0.5f, 0.5f);
+	public float2 ImageFocus { get; set; } = new(0.5f, 0.5f);
 
 	public float ImageBlend { get; set; } = 0.1f;
 
@@ -71,7 +69,7 @@ public sealed class M3HeroHeader
 
 	public bool Animated { get; set; } = true;
 
-	public (Vector2 Min, Vector2 Max) Draw(IDalamudTextureWrap? image = null)
+	public (float2 Min, float2 Max) Draw(IM3Texture? image = null)
 	{
 		var s = M3.Scheme;
 		var scale = M3.Scale;
@@ -89,7 +87,7 @@ public sealed class M3HeroHeader
 		height = MathF.Min(height, windowSize.Y * MaxWindowShare);
 
 		var min = windowPos;
-		var max = new Vector2(windowPos.X + windowSize.X, windowPos.Y + height);
+		var max = new float2(windowPos.X + windowSize.X, windowPos.Y + height);
 		var drawList = ImGui.GetWindowDrawList();
 
 		drawList.PushClipRect(windowPos, windowPos + windowSize, false);
@@ -120,11 +118,11 @@ public sealed class M3HeroHeader
 		_warm = false;
 	}
 
-	private void DrawImage(ImDrawListPtr drawList, IDalamudTextureWrap image, Vector2 min, Vector2 max, float rounding)
+	private void DrawImage(ImDrawListPtr drawList, IM3Texture image, float2 min, float2 max, float rounding)
 	{
 		var boxAspect = (max.X - min.X) / MathF.Max(1f, max.Y - min.Y);
-		var uvMin = Vector2.Zero;
-		var uvMax = Vector2.One;
+		var uvMin = float2.Zero;
+		var uvMax = float2.One;
 		if (boxAspect > _imageAspect)
 		{
 			var visible = _imageAspect / boxAspect;
@@ -138,14 +136,14 @@ public sealed class M3HeroHeader
 			uvMax.X = uvMin.X + visible;
 		}
 
-		drawList.AddImageRounded(image.Handle, min, max, uvMin, uvMax, M3.U32(Vector4.One), rounding, ImDrawFlags.RoundCornersTop);
+		drawList.AddImageRounded(image.Handle, min, max, uvMin, uvMax, M3.U32(float4.One), rounding, ImDrawFlags.RoundCornersTop);
 
 		var surface = ImGui.ColorConvertU32ToFloat4(ImGui.GetColorU32(ImGuiCol.WindowBg));
 		var blendTop = max.Y - ((max.Y - min.Y) * Math.Clamp(ImageBlend, 0f, 1f));
-		EasedGradient(drawList, new Vector2(min.X, blendTop), max, surface with { W = 0f }, surface);
+		EasedGradient(drawList, new float2(min.X, blendTop), max, surface with { W = 0f }, surface);
 	}
 
-	private void DrawGradient(ImDrawListPtr drawList, M3Scheme s, Vector2 min, Vector2 max, float rounding)
+	private void DrawGradient(ImDrawListPtr drawList, M3Scheme s, float2 min, float2 max, float rounding)
 	{
 		var top = M3ColorMath.Mix(s.SurfaceContainerLowest, s.PrimaryContainer, 0.55f);
 		var bottom = M3ColorMath.Mix(s.Surface, s.PrimaryContainer, 0.28f);
@@ -153,11 +151,11 @@ public sealed class M3HeroHeader
 		// Multi-color rects can't be rounded, so a solid strip draws the rounded top corners.
 		if (rounding > 0f)
 		{
-			drawList.AddRectFilled(min, new Vector2(max.X, min.Y + (rounding * 2f)), M3.U32(top), rounding, ImDrawFlags.RoundCornersTop);
+			drawList.AddRectFilled(min, new float2(max.X, min.Y + (rounding * 2f)), M3.U32(top), rounding, ImDrawFlags.RoundCornersTop);
 		}
 
-		M3Draw.VerticalGradient(drawList, new Vector2(min.X, min.Y + rounding), max, top, bottom);
-		EasedGradient(drawList, new Vector2(min.X, max.Y), new Vector2(max.X, max.Y + (FadeHeight * M3.Scale)), bottom, bottom with { W = 0f });
+		M3Draw.VerticalGradient(drawList, new float2(min.X, min.Y + rounding), max, top, bottom);
+		EasedGradient(drawList, new float2(min.X, max.Y), new float2(max.X, max.Y + (FadeHeight * M3.Scale)), bottom, bottom with { W = 0f });
 
 		drawList.PushClipRect(min, max, true);
 		DrawStaticStars(drawList, min, max - min, s.OnSurface);
@@ -169,7 +167,7 @@ public sealed class M3HeroHeader
 		drawList.PopClipRect();
 	}
 
-	private static void EasedGradient(ImDrawListPtr drawList, Vector2 min, Vector2 max, Vector4 from, Vector4 to)
+	private static void EasedGradient(ImDrawListPtr drawList, float2 min, float2 max, float4 from, float4 to)
 	{
 		var height = max.Y - min.Y;
 		if (height <= 0f)
@@ -181,26 +179,26 @@ public sealed class M3HeroHeader
 		{
 			var near = (float)band / GradientBands;
 			var far = (float)(band + 1) / GradientBands;
-			var nearColor = M3.U32(Vector4.Lerp(from, to, near * near));
-			var farColor = M3.U32(Vector4.Lerp(from, to, far * far));
+			var nearColor = M3.U32(float4.Lerp(from, to, near * near));
+			var farColor = M3.U32(float4.Lerp(from, to, far * far));
 			drawList.AddRectFilledMultiColor(
-				new Vector2(min.X, min.Y + (height * near)),
-				new Vector2(max.X, min.Y + (height * far)),
+				new float2(min.X, min.Y + (height * near)),
+				new float2(max.X, min.Y + (height * far)),
 				nearColor, nearColor, farColor, farColor);
 		}
 	}
 
-	private void DrawStaticStars(ImDrawListPtr drawList, Vector2 origin, Vector2 size, Vector4 color)
+	private void DrawStaticStars(ImDrawListPtr drawList, float2 origin, float2 size, float4 color)
 	{
 		var radius = 0.9f * M3.Scale;
 		foreach (var star in _staticStars)
 		{
-			var position = origin + new Vector2(star.X * size.X, star.Y * size.Y);
+			var position = origin + new float2(star.X * size.X, star.Y * size.Y);
 			drawList.AddCircleFilled(position, radius, M3.U32(color, star.Z * 0.6f), 8);
 		}
 	}
 
-	private void DrawParticles(ImDrawListPtr drawList, Vector2 origin, Vector2 size, M3Scheme s)
+	private void DrawParticles(ImDrawListPtr drawList, float2 origin, float2 size, M3Scheme s)
 	{
 		var delta = Math.Clamp(ImGui.GetIO().DeltaTime, 0f, 0.1f);
 		var scale = M3.Scale;
@@ -270,7 +268,7 @@ public sealed class M3HeroHeader
 		}
 	}
 
-	private static void DrawShootingStar(ImDrawListPtr drawList, Vector2 head, Vector2 velocity, Vector4 color, float alpha, float scale)
+	private static void DrawShootingStar(ImDrawListPtr drawList, float2 head, float2 velocity, float4 color, float alpha, float scale)
 	{
 		var speed = velocity.Length();
 		if (speed <= 0.001f)
@@ -283,8 +281,8 @@ public sealed class M3HeroHeader
 		{
 			var near = (float)segment / TrailSegments;
 			var far = (float)(segment + 1) / TrailSegments;
-			var from = Vector2.Lerp(head, tail, near);
-			var to = Vector2.Lerp(head, tail, far);
+			var from = float2.Lerp(head, tail, near);
+			var to = float2.Lerp(head, tail, far);
 			var fade = (1f - near) * alpha;
 			var width = float.Lerp(2.5f, 0.5f, near) * scale;
 
@@ -295,7 +293,7 @@ public sealed class M3HeroHeader
 		drawList.AddCircleFilled(head, 1.8f * scale, M3.U32(color, alpha), 10);
 	}
 
-	private void SpawnTwinkle(Vector2 size, bool prewarmed)
+	private void SpawnTwinkle(float2 size, bool prewarmed)
 	{
 		var scale = M3.Scale;
 		var depth = _random.Next(3) switch
@@ -313,8 +311,8 @@ public sealed class M3HeroHeader
 		{
 			Kind = Kind.Twinkle,
 			Tone = roll < 0.4f ? Tone.Primary : roll < 0.7f ? Tone.Tertiary : Tone.Neutral,
-			Position = new Vector2(_random.NextSingle() * size.X, _random.NextSingle() * size.Y),
-			Velocity = new Vector2((_random.NextSingle() - 0.5f) * drift, (_random.NextSingle() - 0.5f) * drift),
+			Position = new float2(_random.NextSingle() * size.X, _random.NextSingle() * size.Y),
+			Velocity = new float2((_random.NextSingle() - 0.5f) * drift, (_random.NextSingle() - 0.5f) * drift),
 			MaxLife = maxLife,
 
 			Life = prewarmed ? maxLife * (0.3f + (_random.NextSingle() * 0.7f)) : maxLife,
@@ -324,7 +322,7 @@ public sealed class M3HeroHeader
 		});
 	}
 
-	private void SpawnShootingStar(Vector2 size)
+	private void SpawnShootingStar(float2 size)
 	{
 		var scale = M3.Scale;
 		var maxLife = 1.4f + (_random.NextSingle() * 0.6f);
@@ -333,8 +331,8 @@ public sealed class M3HeroHeader
 		{
 			Kind = Kind.Shooting,
 			Tone = _random.NextSingle() < 0.6f ? Tone.Primary : Tone.Neutral,
-			Position = new Vector2(size.X * (0.35f + (_random.NextSingle() * 0.6f)), -8f * scale),
-			Velocity = new Vector2(-160f - (_random.NextSingle() * 80f), 90f + (_random.NextSingle() * 60f)) * scale,
+			Position = new float2(size.X * (0.35f + (_random.NextSingle() * 0.6f)), -8f * scale),
+			Velocity = new float2(-160f - (_random.NextSingle() * 80f), 90f + (_random.NextSingle() * 60f)) * scale,
 			MaxLife = maxLife,
 			Life = maxLife,
 			Size = 1f,
@@ -342,7 +340,7 @@ public sealed class M3HeroHeader
 		});
 	}
 
-	private static void Bounce(ref Particle particle, Vector2 size)
+	private static void Bounce(ref Particle particle, float2 size)
 	{
 		if ((particle.Position.X < 0f && particle.Velocity.X < 0f) || (particle.Position.X > size.X && particle.Velocity.X > 0f))
 		{
@@ -355,12 +353,12 @@ public sealed class M3HeroHeader
 		}
 	}
 
-	private static bool OutOfBounds(Vector2 position, Vector2 size, float margin)
+	private static bool OutOfBounds(float2 position, float2 size, float margin)
 	{
 		return position.X < -margin || position.X > size.X + margin || position.Y > size.Y + margin;
 	}
 
-	private static float EdgeAlpha(Vector2 position, Vector2 size, float distance)
+	private static float EdgeAlpha(float2 position, float2 size, float distance)
 	{
 		if (distance <= 0f)
 		{
