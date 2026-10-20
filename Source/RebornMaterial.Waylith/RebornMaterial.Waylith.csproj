@@ -1,5 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <Import Project="..\..\Local.props" Condition="Exists('..\..\Local.props')" />
+
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <LangVersion>latest</LangVersion>
@@ -14,7 +16,7 @@
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
     <GenerateDependencyFile>false</GenerateDependencyFile>
-    <RimWorld17Dir Condition="'$(RimWorld17Dir)' == ''">F:\Steam\steamapps\common\RimWorld</RimWorld17Dir>
+    <RimWorld17Dir Condition="'$(RimWorld17Dir)' == ''">C:\Program Files (x86)\Steam\steamapps\common\RimWorld</RimWorld17Dir>
   </PropertyGroup>
 
   <ItemGroup>
