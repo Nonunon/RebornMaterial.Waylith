@@ -96,6 +96,33 @@ public static class M3Host
 		}
 	}
 
+	public static bool IsCovered(Verse.Window window)
+	{
+		var stack = Verse.Find.WindowStack;
+		if (stack == null)
+		{
+			return false;
+		}
+
+		var found = false;
+		for (var i = 0; i < stack.Count; i++)
+		{
+			var other = stack[i];
+			if (ReferenceEquals(other, window))
+			{
+				found = true;
+				continue;
+			}
+
+			if (found && (other.absorbInputAroundWindow || other.windowRect.Overlaps(window.windowRect)))
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	public static void ReleaseMouse()
 	{
 		ImGui.GetIO().AddMousePosEvent(-float.MaxValue, -float.MaxValue);
