@@ -3,12 +3,12 @@ namespace RebornMaterial;
 // Uses CIE LCh instead of Material's HCT to avoid a color library. Close enough for UI.
 public sealed class TonalPalette(float hue, float chroma)
 {
-	private readonly Dictionary<int, Vector4> _cache = [];
+	private readonly Dictionary<int, float4> _cache = [];
 
 	public float Hue { get; } = hue;
 	public float Chroma { get; } = chroma;
 
-	public Vector4 this[float tone]
+	public float4 this[float tone]
 	{
 		get
 		{
@@ -47,7 +47,7 @@ public sealed class CorePalette
 	public TonalPalette NeutralVariant { get; }
 	public TonalPalette Error { get; }
 
-	public static CorePalette FromSeed(Vector4 seed)
+	public static CorePalette FromSeed(float4 seed)
 	{
 		M3ColorMath.ToLch(seed, out _, out var chroma, out var hue);
 
@@ -129,50 +129,50 @@ public sealed class M3Scheme
 		Info = _infoPalette[80];
 	}
 
-	public Vector4 Primary { get; }
-	public Vector4 OnPrimary { get; }
-	public Vector4 PrimaryContainer { get; }
-	public Vector4 OnPrimaryContainer { get; }
-	public Vector4 PrimaryFixedDim { get; }
+	public float4 Primary { get; }
+	public float4 OnPrimary { get; }
+	public float4 PrimaryContainer { get; }
+	public float4 OnPrimaryContainer { get; }
+	public float4 PrimaryFixedDim { get; }
 
-	public Vector4 InversePrimary { get; }
+	public float4 InversePrimary { get; }
 
-	public Vector4 Secondary { get; }
-	public Vector4 SecondaryContainer { get; }
-	public Vector4 OnSecondaryContainer { get; }
+	public float4 Secondary { get; }
+	public float4 SecondaryContainer { get; }
+	public float4 OnSecondaryContainer { get; }
 
-	public Vector4 Tertiary { get; }
-	public Vector4 TertiaryContainer { get; }
-	public Vector4 OnTertiaryContainer { get; }
+	public float4 Tertiary { get; }
+	public float4 TertiaryContainer { get; }
+	public float4 OnTertiaryContainer { get; }
 
-	public Vector4 Error { get; }
-	public Vector4 OnError { get; }
-	public Vector4 ErrorContainer { get; }
-	public Vector4 OnErrorContainer { get; }
+	public float4 Error { get; }
+	public float4 OnError { get; }
+	public float4 ErrorContainer { get; }
+	public float4 OnErrorContainer { get; }
 
-	public Vector4 Surface { get; }
-	public Vector4 OnSurface { get; }
-	public Vector4 SurfaceContainerLowest { get; }
-	public Vector4 SurfaceContainerLow { get; }
-	public Vector4 SurfaceContainer { get; }
-	public Vector4 SurfaceContainerHigh { get; }
-	public Vector4 SurfaceContainerHighest { get; }
-	public Vector4 OnSurfaceVariant { get; }
-	public Vector4 InverseSurface { get; }
-	public Vector4 InverseOnSurface { get; }
+	public float4 Surface { get; }
+	public float4 OnSurface { get; }
+	public float4 SurfaceContainerLowest { get; }
+	public float4 SurfaceContainerLow { get; }
+	public float4 SurfaceContainer { get; }
+	public float4 SurfaceContainerHigh { get; }
+	public float4 SurfaceContainerHighest { get; }
+	public float4 OnSurfaceVariant { get; }
+	public float4 InverseSurface { get; }
+	public float4 InverseOnSurface { get; }
 
-	public Vector4 Outline { get; }
-	public Vector4 OutlineVariant { get; }
-	public Vector4 Scrim { get; }
-	public Vector4 Shadow { get; }
+	public float4 Outline { get; }
+	public float4 OutlineVariant { get; }
+	public float4 Scrim { get; }
+	public float4 Shadow { get; }
 
-	public Vector4 Warning { get; }
-	public Vector4 WarningContainer { get; }
-	public Vector4 Success { get; }
-	public Vector4 SuccessContainer { get; }
-	public Vector4 Info { get; }
+	public float4 Warning { get; }
+	public float4 WarningContainer { get; }
+	public float4 Success { get; }
+	public float4 SuccessContainer { get; }
+	public float4 Info { get; }
 
-	public static M3Scheme FromSeed(Vector4 seed)
+	public static M3Scheme FromSeed(float4 seed)
 	{
 		return new M3Scheme(CorePalette.FromSeed(seed));
 	}
@@ -192,23 +192,23 @@ public static class M3ColorMath
 		return hue < 0f ? hue + 360f : hue;
 	}
 
-	public static Vector4 FromRgb(uint rgb)
+	public static float4 FromRgb(uint rgb)
 	{
-		return new Vector4(
+		return new float4(
 			((rgb >> 16) & 0xFF) / 255f,
 			((rgb >> 8) & 0xFF) / 255f,
 			(rgb & 0xFF) / 255f,
 			1f);
 	}
 
-	public static void ToLch(Vector4 color, out float lightness, out float chroma, out float hue)
+	public static void ToLch(float4 color, out float lightness, out float chroma, out float hue)
 	{
 		ToLab(color, out lightness, out var a, out var b);
 		chroma = MathF.Sqrt((a * a) + (b * b));
 		hue = chroma < 0.0001f ? 0f : WrapHue(MathF.Atan2(b, a) * 180f / MathF.PI);
 	}
 
-	public static void ToLab(Vector4 color, out float lightness, out float a, out float b)
+	public static void ToLab(float4 color, out float lightness, out float a, out float b)
 	{
 		var r = Linearize(color.X);
 		var g = Linearize(color.Y);
@@ -227,7 +227,7 @@ public static class M3ColorMath
 		b = 200f * (fy - fz);
 	}
 
-	public static Vector4 FromLch(float lightness, float chroma, float hue)
+	public static float4 FromLch(float lightness, float chroma, float hue)
 	{
 		if (chroma < 0.0001f)
 		{
@@ -261,22 +261,22 @@ public static class M3ColorMath
 		return best;
 	}
 
-	public static Vector4 FromLab(float lightness, float a, float b)
+	public static float4 FromLab(float lightness, float a, float b)
 	{
 		return FromLabRaw(lightness, a, b, out _);
 	}
 
-	public static Vector4 Mix(Vector4 from, Vector4 to, float amount)
+	public static float4 Mix(float4 from, float4 to, float amount)
 	{
 		amount = Math.Clamp(amount, 0f, 1f);
-		return new Vector4(
+		return new float4(
 			Delinearize(float.Lerp(Linearize(from.X), Linearize(to.X), amount)),
 			Delinearize(float.Lerp(Linearize(from.Y), Linearize(to.Y), amount)),
 			Delinearize(float.Lerp(Linearize(from.Z), Linearize(to.Z), amount)),
 			float.Lerp(from.W, to.W, amount));
 	}
 
-	private static Vector4 FromLabRaw(float lightness, float a, float b, out bool inGamut)
+	private static float4 FromLabRaw(float lightness, float a, float b, out bool inGamut)
 	{
 		var fy = (lightness + 16f) / 116f;
 		var fx = fy + (a / 500f);
@@ -295,7 +295,7 @@ public static class M3ColorMath
 			&& g >= -tolerance && g <= 1f + tolerance
 			&& bl >= -tolerance && bl <= 1f + tolerance;
 
-		return new Vector4(
+		return new float4(
 			Math.Clamp(Delinearize(r), 0f, 1f),
 			Math.Clamp(Delinearize(g), 0f, 1f),
 			Math.Clamp(Delinearize(bl), 0f, 1f),

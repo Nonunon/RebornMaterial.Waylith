@@ -29,7 +29,7 @@ public static class M3Style
 		var padding = M3.PaddingScale;
 		var colors = 0;
 
-		void Color(ImGuiCol target, Vector4 value)
+		void Color(ImGuiCol target, float4 value)
 		{
 			ImGui.PushStyleColor(target, value);
 			colors++;
@@ -38,10 +38,10 @@ public static class M3Style
 		Color(ImGuiCol.Text, s.OnSurface);
 		Color(ImGuiCol.TextDisabled, M3.Alpha(s.OnSurfaceVariant, M3.DisabledContent));
 		Color(ImGuiCol.WindowBg, M3.Alpha(s.Surface, 0.97f));
-		Color(ImGuiCol.ChildBg, new Vector4(0f, 0f, 0f, 0f));
+		Color(ImGuiCol.ChildBg, new float4(0f, 0f, 0f, 0f));
 		Color(ImGuiCol.PopupBg, M3.Alpha(s.SurfaceContainerHigh, 0.99f));
 		Color(ImGuiCol.Border, M3.Alpha(s.OutlineVariant, 0.80f));
-		Color(ImGuiCol.BorderShadow, new Vector4(0f, 0f, 0f, 0f));
+		Color(ImGuiCol.BorderShadow, new float4(0f, 0f, 0f, 0f));
 
 		Color(ImGuiCol.FrameBg, M3.Alpha(s.SurfaceContainerHighest, 0.90f));
 		Color(ImGuiCol.FrameBgHovered, M3.StateLayer(s.SurfaceContainerHighest, s.OnSurface, true, false));
@@ -52,7 +52,7 @@ public static class M3Style
 		Color(ImGuiCol.TitleBgCollapsed, M3.Alpha(s.SurfaceContainerLow, 0.85f));
 		Color(ImGuiCol.MenuBarBg, s.SurfaceContainer);
 
-		Color(ImGuiCol.ScrollbarBg, new Vector4(0f, 0f, 0f, 0f));
+		Color(ImGuiCol.ScrollbarBg, new float4(0f, 0f, 0f, 0f));
 		Color(ImGuiCol.ScrollbarGrab, M3.Alpha(s.Outline, 0.45f));
 		Color(ImGuiCol.ScrollbarGrabHovered, M3.Alpha(s.Outline, 0.70f));
 		Color(ImGuiCol.ScrollbarGrabActive, M3.Alpha(s.Primary, 0.80f));
@@ -73,15 +73,20 @@ public static class M3Style
 		Color(ImGuiCol.SeparatorHovered, M3.Alpha(s.Primary, 0.60f));
 		Color(ImGuiCol.SeparatorActive, s.Primary);
 
-		Color(ImGuiCol.ResizeGrip, new Vector4(0f, 0f, 0f, 0f));
+		Color(ImGuiCol.ResizeGrip, new float4(0f, 0f, 0f, 0f));
 		Color(ImGuiCol.ResizeGripHovered, M3.Alpha(s.Primary, 0.35f));
 		Color(ImGuiCol.ResizeGripActive, M3.Alpha(s.Primary, 0.65f));
 
 		Color(ImGuiCol.Tab, M3.Alpha(s.SurfaceContainer, 0.90f));
 		Color(ImGuiCol.TabHovered, M3.Alpha(s.SecondaryContainer, 0.90f));
-		Color(ImGuiCol.TabActive, s.SecondaryContainer);
-		Color(ImGuiCol.TabUnfocused, M3.Alpha(s.SurfaceContainerLow, 0.90f));
-		Color(ImGuiCol.TabUnfocusedActive, M3.Alpha(s.SecondaryContainer, 0.70f));
+		Color(ImGuiCol.TabSelected, s.SecondaryContainer);
+		Color(ImGuiCol.TabDimmed, M3.Alpha(s.SurfaceContainerLow, 0.90f));
+		Color(ImGuiCol.TabDimmedSelected, M3.Alpha(s.SecondaryContainer, 0.70f));
+		Color(ImGuiCol.TabSelectedOverline, s.Primary);
+		Color(ImGuiCol.TabDimmedSelectedOverline, M3.Alpha(s.Primary, 0.60f));
+		Color(ImGuiCol.TextLink, s.Primary);
+		Color(ImGuiCol.InputTextCursor, s.Primary);
+		Color(ImGuiCol.TreeLines, M3.Alpha(s.OutlineVariant, 0.70f));
 
 		Color(ImGuiCol.PlotLines, s.Primary);
 		Color(ImGuiCol.PlotLinesHovered, s.PrimaryFixedDim);
@@ -91,19 +96,19 @@ public static class M3Style
 		Color(ImGuiCol.TableHeaderBg, s.SurfaceContainerHigh);
 		Color(ImGuiCol.TableBorderStrong, M3.Alpha(s.Outline, 0.55f));
 		Color(ImGuiCol.TableBorderLight, M3.Alpha(s.OutlineVariant, 0.55f));
-		Color(ImGuiCol.TableRowBg, new Vector4(0f, 0f, 0f, 0f));
+		Color(ImGuiCol.TableRowBg, new float4(0f, 0f, 0f, 0f));
 		Color(ImGuiCol.TableRowBgAlt, M3.Alpha(s.OnSurface, 0.035f));
 
 		Color(ImGuiCol.TextSelectedBg, M3.Alpha(s.Primary, 0.35f));
 		Color(ImGuiCol.DragDropTarget, s.Tertiary);
-		Color(ImGuiCol.NavHighlight, M3.Alpha(s.Primary, 0.70f));
+		Color(ImGuiCol.NavCursor, M3.Alpha(s.Primary, 0.70f));
 		Color(ImGuiCol.NavWindowingHighlight, M3.Alpha(s.OnSurface, 0.35f));
 		Color(ImGuiCol.NavWindowingDimBg, M3.Alpha(s.Scrim, 0.35f));
 		Color(ImGuiCol.ModalWindowDimBg, M3.Alpha(s.Scrim, 0.55f));
 
 		var vars = 0;
 
-		void Vec(ImGuiStyleVar target, Vector2 value)
+		void Vec(ImGuiStyleVar target, float2 value)
 		{
 			ImGui.PushStyleVar(target, value);
 			vars++;
@@ -117,18 +122,18 @@ public static class M3Style
 
 		Vec(ImGuiStyleVar.WindowPadding, density switch
 		{
-			M3Density.Tight => new Vector2(6f, 6f),
-			M3Density.Compact => new Vector2(10f, 8f),
-			_ => new Vector2(16f, 14f),
+			M3Density.Tight => new float2(6f, 6f),
+			M3Density.Compact => new float2(10f, 8f),
+			_ => new float2(16f, 14f),
 		} * padding);
 		// Frame padding sets the height of inputs and combos, so it follows the element size, not the padding setting.
-		Vec(ImGuiStyleVar.FramePadding, (compact ? new Vector2(6f, 3f) : new Vector2(10f, 6f)) * scale);
-		Vec(ImGuiStyleVar.CellPadding, (compact ? new Vector2(4f, 2f) : new Vector2(8f, 6f)) * padding);
-		Vec(ImGuiStyleVar.ItemSpacing, (compact ? new Vector2(5f, 4f) : new Vector2(8f, 8f)) * padding);
-		Vec(ImGuiStyleVar.ItemInnerSpacing, (compact ? new Vector2(4f, 3f) : new Vector2(8f, 6f)) * padding);
-		Vec(ImGuiStyleVar.SelectableTextAlign, new Vector2(0f, 0.5f));
-		Vec(ImGuiStyleVar.WindowTitleAlign, new Vector2(0f, 0.5f));
-		Vec(ImGuiStyleVar.ButtonTextAlign, new Vector2(0.5f, 0.5f));
+		Vec(ImGuiStyleVar.FramePadding, (compact ? new float2(6f, 3f) : new float2(10f, 6f)) * scale);
+		Vec(ImGuiStyleVar.CellPadding, (compact ? new float2(4f, 2f) : new float2(8f, 6f)) * padding);
+		Vec(ImGuiStyleVar.ItemSpacing, (compact ? new float2(5f, 4f) : new float2(8f, 8f)) * padding);
+		Vec(ImGuiStyleVar.ItemInnerSpacing, (compact ? new float2(4f, 3f) : new float2(8f, 6f)) * padding);
+		Vec(ImGuiStyleVar.SelectableTextAlign, new float2(0f, 0.5f));
+		Vec(ImGuiStyleVar.WindowTitleAlign, new float2(0f, 0.5f));
+		Vec(ImGuiStyleVar.ButtonTextAlign, new float2(0.5f, 0.5f));
 
 		Num(ImGuiStyleVar.IndentSpacing, 20f * scale);
 		Num(ImGuiStyleVar.ScrollbarSize, 10f * scale);

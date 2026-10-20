@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <AssemblyName>RebornMaterial.Waylith</AssemblyName>
+    <RootNamespace>RebornMaterial</RootNamespace>
+    <Version>1.0.0</Version>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DebugType>none</DebugType>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+    <GenerateDependencyFile>false</GenerateDependencyFile>
+    <RimWorld17Dir Condition="'$(RimWorld17Dir)' == ''">F:\Steam\steamapps\common\RimWorld</RimWorld17Dir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Using Include="Brutal.ImGuiApi" />
+    <Using Include="Brutal.Numerics" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Assembly-CSharp" HintPath="$(RimWorld17Dir)\Assembly-CSharp.dll" Private="false" />
+    <Reference Include="UnityStubs" HintPath="$(RimWorld17Dir)\UnityStubs.dll" Private="false" />
+    <Reference Include="Brutal.ImGui" HintPath="$(RimWorld17Dir)\Brutal.ImGui.dll" Private="false" />
+    <Reference Include="Brutal.Core.Numerics" HintPath="$(RimWorld17Dir)\Brutal.Core.Numerics.dll" Private="false" />
+    <Reference Include="Brutal.Core.Maths" HintPath="$(RimWorld17Dir)\Brutal.Core.Maths.dll" Private="false" />
+    <Reference Include="Brutal.Core.Strings" HintPath="$(RimWorld17Dir)\Brutal.Core.Strings.dll" Private="false" />
+    <Reference Include="Brutal.Core.Common" HintPath="$(RimWorld17Dir)\Brutal.Core.Common.dll" Private="false" />
+    <Reference Include="Brutal.Core.Memory" HintPath="$(RimWorld17Dir)\Brutal.Core.Memory.dll" Private="false" />
+    <Reference Include="Brutal.Interop" HintPath="$(RimWorld17Dir)\Brutal.Interop.dll" Private="false" />
+  </ItemGroup>
+
+</Project>

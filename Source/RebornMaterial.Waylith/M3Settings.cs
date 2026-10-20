@@ -4,7 +4,7 @@ namespace RebornMaterial;
 public interface IM3Settings
 {
 	/// <summary>The seed the whole color scheme is derived from. Grey or black falls back to <see cref="M3.DefaultSeed"/>.</summary>
-	Vector4 UiAccentColor { get; set; }
+	float4 UiAccentColor { get; set; }
 
 	/// <summary>Text size multiplier, clamped to 0.5 - 3.</summary>
 	float UiTextScale { get; set; }
@@ -22,7 +22,7 @@ public interface IM3Settings
 
 public sealed class M3Settings : IM3Settings
 {
-	public Vector4 UiAccentColor { get; set; } = M3.DefaultSeed;
+	public float4 UiAccentColor { get; set; } = M3.DefaultSeed;
 
 	public float UiTextScale { get; set; } = 1f;
 
