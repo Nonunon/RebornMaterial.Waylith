@@ -1,0 +1,107 @@
+using Dalamud.Interface.Utility.Raii;
+
+namespace RebornMaterial;
+
+public enum M3TextStyle
+{
+	Body,
+
+	Muted,
+
+	Faint,
+
+	Accent,
+
+	Title,
+
+	Heading,
+
+	Label,
+
+	Error,
+
+	Warning,
+
+	Success,
+
+	Info,
+}
+
+public static class M3Text
+{
+	public static void Draw(string text, M3TextStyle style = M3TextStyle.Body, bool wrap = false)
+	{
+		using var scope = Push(style);
+		if (wrap)
+		{
+			ImGui.TextWrapped(text);
+		}
+		else
+		{
+			ImGui.TextUnformatted(text);
+		}
+	}
+
+	public static Vector2 Measure(string text, M3TextStyle style = M3TextStyle.Body)
+	{
+		var font = FontOf(style);
+		using var pushed = ImRaii.PushFont(font.GetValueOrDefault(), font.HasValue);
+		return ImGui.CalcTextSize(text);
+	}
+
+	public static Vector4 ColorOf(M3TextStyle style)
+	{
+		var s = M3.Scheme;
+		return style switch
+		{
+			M3TextStyle.Muted or M3TextStyle.Label => s.OnSurfaceVariant,
+			M3TextStyle.Faint => M3.Alpha(s.OnSurfaceVariant, 0.6f),
+			M3TextStyle.Accent => s.Primary,
+			M3TextStyle.Error => s.Error,
+			M3TextStyle.Warning => s.Warning,
+			M3TextStyle.Success => s.Success,
+			M3TextStyle.Info => s.Info,
+			_ => s.OnSurface,
+		};
+	}
+
+	public static ImFontPtr? FontOf(M3TextStyle style)
+	{
+		return style switch
+		{
+			M3TextStyle.Title => M3.TitleMedium,
+			M3TextStyle.Heading => M3.TitleLarge,
+			M3TextStyle.Label => M3.LabelSmall,
+			_ => null,
+		};
+	}
+
+	// Applies a style to any ImGui text drawn inside it, such as BulletText or table cells.
+	public static Scope Push(M3TextStyle style)
+	{
+		var font = FontOf(style);
+		if (font is { } pushed)
+		{
+			ImGui.PushFont(pushed);
+		}
+
+		ImGui.PushStyleColor(ImGuiCol.Text, ColorOf(style));
+		return new Scope(true, font.HasValue);
+	}
+
+	public readonly struct Scope(bool color, bool font) : IDisposable
+	{
+		public void Dispose()
+		{
+			if (color)
+			{
+				ImGui.PopStyleColor();
+			}
+
+			if (font)
+			{
+				ImGui.PopFont();
+			}
+		}
+	}
+}
