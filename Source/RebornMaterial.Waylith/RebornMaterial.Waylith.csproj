@@ -29,6 +29,7 @@
   <ItemGroup>
     <Reference Include="Assembly-CSharp" HintPath="$(RimWorld17Dir)\Assembly-CSharp.dll" Private="false" />
     <Reference Include="UnityStubs" HintPath="$(RimWorld17Dir)\UnityStubs.dll" Private="false" />
+    <Reference Include="Waylith" HintPath="$(RimWorld17Dir)\Waylith.dll" Private="false" />
     <Reference Include="Brutal.ImGui" HintPath="$(RimWorld17Dir)\Brutal.ImGui.dll" Private="false" />
     <Reference Include="Brutal.Core.Numerics" HintPath="$(RimWorld17Dir)\Brutal.Core.Numerics.dll" Private="false" />
     <Reference Include="Brutal.Core.Maths" HintPath="$(RimWorld17Dir)\Brutal.Core.Maths.dll" Private="false" />
