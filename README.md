@@ -43,7 +43,7 @@ public class MyWindow : Window
             return;
         M3Host.FeedInput();
         typing.Update();
-        if (M3Host.IsCovered(this))
+        if (M3Host.ShouldHide(this))
         {
             M3Host.ReleaseMouse();
             return;
@@ -51,7 +51,9 @@ public class MyWindow : Window
         M3.BeginFrame();
         using (M3Style.Push())
         {
-            if (ImGui.Begin("My window"))
+            bool visible = ImGui.Begin("My window");
+            M3Host.Claim(this);
+            if (visible)
                 M3Widgets.Button("##hello", "Hello", M3ButtonStyle.Filled);
             ImGui.End();
         }
@@ -63,7 +65,7 @@ Call `M3.Initialize(settings)` once at startup. Set the window's `windowRect` to
 
 - `M3Host.FeedInput` passes the mouse, keys, typed characters and window focus to ImGui; the game itself feeds it nothing.
 - `M3TypingGuard` stops RimWorld's hotkeys and camera keys while an ImGui text field has focus. RimWorld skips hotkeys while a window's search box has focus, so the guard focuses a hidden one.
-- ImGui always draws on top of RimWorld's own windows, so `M3Host.IsCovered` reports when a RimWorld window above yours overlaps it or blocks input, such as a confirmation dialog.
+- ImGui always draws on top of RimWorld's own windows. If the [Underlayer](https://github.com/Nonunon/Underlayer) mod is installed, `M3Host.Claim` lets it stack your ImGui window with RimWorld's windows, so a dialog opened later covers it. Without Underlayer, `M3Host.ShouldHide` (the same as `M3Host.IsCovered`) reports when a RimWorld window above yours overlaps it or blocks input, so you can hide it instead. `M3Host.Layered` says which one applies. Underlayer is found at runtime, so your mod doesn't need to reference it.
 - `M3GameTexture` wraps any RimWorld `Texture2D` or `RenderTexture` (item icons, pawn portraits) for components that take an image. It relies on a private method of the game's GUI backend, so a later game build could break it; it then logs one warning and draws nothing.
 - Brutal passes some text straight to printf, so a `%` in `ImGui.TextWrapped`, `TextColored` or `TextDisabled` crashes the game. Escape it as `%%`, or use `ImGui.Text`.
 
