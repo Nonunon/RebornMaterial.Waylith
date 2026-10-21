@@ -31,6 +31,9 @@ public static class M3Host
 	private static bool _hooked;
 	private static int _fedFrame = -1;
 	private static bool _focused = true;
+	private static bool _layersLooked;
+	private static Func<bool>? _layersAvailable;
+	private static Action<Verse.Window>? _layersClaim;
 
 	public static int MappedKeyCount => Keys.Length;
 
@@ -121,6 +124,51 @@ public static class M3Host
 		}
 
 		return false;
+	}
+
+	public static bool Layered
+	{
+		get
+		{
+			FindUnderlayer();
+			return _layersAvailable?.Invoke() == true;
+		}
+	}
+
+	public static void Claim(Verse.Window window)
+	{
+		if (Layered)
+		{
+			_layersClaim!(window);
+		}
+	}
+
+	public static bool ShouldHide(Verse.Window window) => !Layered && IsCovered(window);
+
+	private static void FindUnderlayer()
+	{
+		if (_layersLooked)
+		{
+			return;
+		}
+
+		_layersLooked = true;
+		try
+		{
+			var assembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.GetName().Name == "Underlayer");
+			var layers = assembly?.GetType("Underlayer.Layers");
+			var available = layers?.GetProperty("Available")?.GetMethod;
+			var claim = layers?.GetMethod("Claim", [typeof(Verse.Window)]);
+			if (available != null && claim != null)
+			{
+				_layersAvailable = available.CreateDelegate<Func<bool>>();
+				_layersClaim = claim.CreateDelegate<Action<Verse.Window>>();
+			}
+		}
+		catch (Exception e)
+		{
+			Verse.Log.Warning("[RebornMaterial] Underlayer found but not usable: " + e.Message);
+		}
 	}
 
 	public static void ReleaseMouse()
