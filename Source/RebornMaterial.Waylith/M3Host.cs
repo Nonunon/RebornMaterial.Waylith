@@ -34,6 +34,7 @@ public static class M3Host
 	private static bool _layersLooked;
 	private static Func<bool>? _layersAvailable;
 	private static Action<Verse.Window>? _layersClaim;
+	private static Action<Verse.Window, bool>? _layersClaimRising;
 
 	public static int MappedKeyCount => Keys.Length;
 
@@ -135,9 +136,20 @@ public static class M3Host
 		}
 	}
 
-	public static void Claim(Verse.Window window)
+	public static void Claim(Verse.Window window) => Claim(window, false);
+
+	public static void Claim(Verse.Window window, bool riseAboveDialogs)
 	{
-		if (Layered)
+		if (!Layered)
+		{
+			return;
+		}
+
+		if (_layersClaimRising != null)
+		{
+			_layersClaimRising(window, riseAboveDialogs);
+		}
+		else
 		{
 			_layersClaim!(window);
 		}
@@ -163,6 +175,7 @@ public static class M3Host
 			{
 				_layersAvailable = available.CreateDelegate<Func<bool>>();
 				_layersClaim = claim.CreateDelegate<Action<Verse.Window>>();
+				_layersClaimRising = layers!.GetMethod("Claim", [typeof(Verse.Window), typeof(bool)])?.CreateDelegate<Action<Verse.Window, bool>>();
 			}
 		}
 		catch (Exception e)
